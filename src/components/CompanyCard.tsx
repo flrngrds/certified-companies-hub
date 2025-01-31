@@ -22,6 +22,22 @@ export const CompanyCard = ({
   country,
   isNew = false,
 }: CompanyCardProps) => {
+  // Function to determine badge color based on certification level
+  const getCertificationColor = (level: string) => {
+    switch (level.toLowerCase()) {
+      case 'gold':
+        return 'bg-[#FFD700] text-black';
+      case 'silver':
+        return 'bg-[#C0C0C0] text-black';
+      case 'bronze':
+        return 'bg-[#CD7F32] text-white';
+      case 'platinum':
+        return 'bg-[#E5E4E2] text-black';
+      default:
+        return 'bg-primary-light text-primary';
+    }
+  };
+
   return (
     <Card className="w-full hover:shadow-lg transition-shadow duration-200 border-2">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -35,7 +51,7 @@ export const CompanyCard = ({
         </div>
         <Badge
           variant="secondary"
-          className="bg-primary-light text-primary font-medium border border-primary/20"
+          className={`font-medium border ${getCertificationColor(certificationLevel)}`}
         >
           {certificationLevel}
         </Badge>
