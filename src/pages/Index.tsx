@@ -14,6 +14,7 @@ const LATEST_COMPANIES = [
     certificationLevel: "Gold",
     employeeCount: "500-1000",
     industry: "Technology",
+    country: "United States",
     isNew: true,
   },
   {
@@ -22,6 +23,7 @@ const LATEST_COMPANIES = [
     certificationLevel: "Platinum",
     employeeCount: "1000+",
     industry: "Energy",
+    country: "Germany",
     isNew: true,
   },
   {
@@ -30,6 +32,7 @@ const LATEST_COMPANIES = [
     certificationLevel: "Silver",
     employeeCount: "100-500",
     industry: "Construction",
+    country: "United Kingdom",
     isNew: true,
   },
 ];
@@ -42,6 +45,7 @@ const ALL_COMPANIES = [
     certificationLevel: "Gold",
     employeeCount: "500-1000",
     industry: "Healthcare",
+    country: "Canada",
   },
   {
     name: "Global Logistics",
@@ -49,6 +53,7 @@ const ALL_COMPANIES = [
     certificationLevel: "Platinum",
     employeeCount: "1000+",
     industry: "Transportation",
+    country: "France",
   },
   {
     name: "EcoFriendly Solutions",
@@ -56,14 +61,15 @@ const ALL_COMPANIES = [
     certificationLevel: "Gold",
     employeeCount: "100-500",
     industry: "Environmental",
+    country: "Australia",
   },
-  // ... Adding more companies to reach 10
   {
     name: "Digital Innovations",
     website: "www.digitalinnovations.com",
     certificationLevel: "Silver",
     employeeCount: "100-500",
     industry: "Technology",
+    country: "Japan",
   },
   {
     name: "Smart Manufacturing",
@@ -71,6 +77,7 @@ const ALL_COMPANIES = [
     certificationLevel: "Gold",
     employeeCount: "500-1000",
     industry: "Manufacturing",
+    country: "Germany",
   },
   {
     name: "Cloud Services Pro",
@@ -78,6 +85,7 @@ const ALL_COMPANIES = [
     certificationLevel: "Platinum",
     employeeCount: "100-500",
     industry: "Technology",
+    country: "United States",
   },
   {
     name: "Sustainable Foods",
@@ -85,6 +93,7 @@ const ALL_COMPANIES = [
     certificationLevel: "Silver",
     employeeCount: "500-1000",
     industry: "Food & Beverage",
+    country: "France",
   },
 ];
 
@@ -115,7 +124,6 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Filters Sidebar */}
           <aside
             className={`md:w-64 flex-shrink-0 transition-all duration-200 ease-in-out ${
               showFilters ? "block" : "hidden md:block"
@@ -124,7 +132,6 @@ const Index = () => {
             <Filters />
           </aside>
 
-          {/* Main Content */}
           <div className="flex-1 space-y-8">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Certified Companies</h2>
@@ -137,7 +144,6 @@ const Index = () => {
               </Button>
             </div>
 
-            {/* Latest Verified Companies Section */}
             <section>
               <h3 className="text-lg font-medium mb-4">Latest Verified Companies</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -149,38 +155,37 @@ const Index = () => {
 
             <SearchFilters />
 
-            {/* All Companies Section with Pagination */}
+            {/* Pagination Controls */}
+            <div className="flex justify-center items-center gap-4">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                disabled={currentPage === 0}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <span className="text-sm text-gray-600">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
+                }
+                disabled={currentPage === totalPages - 1}
+              >
+                Next
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+
             <section>
               <h3 className="text-lg font-medium mb-4">All Companies</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedCompanies.map((company, index) => (
                   <CompanyCard key={index} {...company} />
                 ))}
-              </div>
-
-              {/* Pagination Controls */}
-              <div className="flex justify-center items-center gap-4 mt-8">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                  disabled={currentPage === 0}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-                <span className="text-sm text-gray-600">
-                  Page {currentPage + 1} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
-                  }
-                  disabled={currentPage === totalPages - 1}
-                >
-                  Next
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
               </div>
             </section>
           </div>

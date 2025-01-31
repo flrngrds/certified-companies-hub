@@ -1,4 +1,4 @@
-import { Building2, Globe, Users } from "lucide-react";
+import { Building2, Globe, Users, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ interface CompanyCardProps {
   certificationLevel: string;
   employeeCount: string;
   industry: string;
+  country: string;
   isNew?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const CompanyCard = ({
   certificationLevel,
   employeeCount,
   industry,
+  country,
   isNew = false,
 }: CompanyCardProps) => {
   return (
@@ -57,6 +59,10 @@ export const CompanyCard = ({
         <div className="flex items-center text-secondary">
           <Building2 className="h-4 w-4 mr-2" />
           <span>{industry}</span>
+        </div>
+        <div className="flex items-center text-secondary">
+          <MapPin className="h-4 w-4 mr-2" />
+          <span>{country}</span>
         </div>
       </CardContent>
       <CardFooter>

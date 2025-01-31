@@ -26,6 +26,20 @@ export const Filters = () => {
       </div>
 
       <div className="space-y-4">
+        <h3 className="font-medium">Country</h3>
+        <div className="space-y-2">
+          {["United States", "United Kingdom", "Canada", "Germany", "France", "Japan", "Australia"].map((country) => (
+            <div key={country} className="flex items-center space-x-2">
+              <Checkbox id={country} />
+              <label htmlFor={country} className="text-sm text-secondary">
+                {country}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-4">
         <h3 className="font-medium">Company Size</h3>
         <div className="space-y-2">
           {["1-50", "51-200", "201-500", "501-1000", "1000+"].map((size) => (
