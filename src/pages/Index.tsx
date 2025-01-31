@@ -4,10 +4,10 @@ import { Filters } from "@/components/Filters";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu } from "lucide-react";
+import { Menu, ArrowLeft, ArrowRight } from "lucide-react";
 
 // Mock data for demonstration
-const MOCK_COMPANIES = [
+const LATEST_COMPANIES = [
   {
     name: "TechCorp Solutions",
     website: "www.techcorp.com",
@@ -30,7 +30,12 @@ const MOCK_COMPANIES = [
     certificationLevel: "Silver",
     employeeCount: "100-500",
     industry: "Construction",
+    isNew: true,
   },
+];
+
+const ALL_COMPANIES = [
+  ...LATEST_COMPANIES,
   {
     name: "HealthCare Plus",
     website: "www.healthcareplus.com",
@@ -38,11 +43,62 @@ const MOCK_COMPANIES = [
     employeeCount: "500-1000",
     industry: "Healthcare",
   },
+  {
+    name: "Global Logistics",
+    website: "www.globallogistics.com",
+    certificationLevel: "Platinum",
+    employeeCount: "1000+",
+    industry: "Transportation",
+  },
+  {
+    name: "EcoFriendly Solutions",
+    website: "www.ecofriendly.com",
+    certificationLevel: "Gold",
+    employeeCount: "100-500",
+    industry: "Environmental",
+  },
+  // ... Adding more companies to reach 10
+  {
+    name: "Digital Innovations",
+    website: "www.digitalinnovations.com",
+    certificationLevel: "Silver",
+    employeeCount: "100-500",
+    industry: "Technology",
+  },
+  {
+    name: "Smart Manufacturing",
+    website: "www.smartmanufacturing.com",
+    certificationLevel: "Gold",
+    employeeCount: "500-1000",
+    industry: "Manufacturing",
+  },
+  {
+    name: "Cloud Services Pro",
+    website: "www.cloudservicespro.com",
+    certificationLevel: "Platinum",
+    employeeCount: "100-500",
+    industry: "Technology",
+  },
+  {
+    name: "Sustainable Foods",
+    website: "www.sustainablefoods.com",
+    certificationLevel: "Silver",
+    employeeCount: "500-1000",
+    industry: "Food & Beverage",
+  },
 ];
 
 const Index = () => {
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(!isMobile);
+  const [currentPage, setCurrentPage] = useState(0);
+  const companiesPerPage = 10;
+
+  const totalPages = Math.ceil(ALL_COMPANIES.length / companiesPerPage);
+  const paginatedCompanies = ALL_COMPANIES.slice(
+    currentPage * companiesPerPage,
+    (currentPage + 1) * companiesPerPage
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,20 +137,52 @@ const Index = () => {
               </Button>
             </div>
 
-            <SearchFilters />
-
+            {/* Latest Verified Companies Section */}
             <section>
               <h3 className="text-lg font-medium mb-4">Latest Verified Companies</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_COMPANIES.map((company, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {LATEST_COMPANIES.map((company, index) => (
                   <CompanyCard key={index} {...company} />
                 ))}
               </div>
             </section>
 
-            <div className="flex justify-center mt-8">
-              <Button variant="outline">Load More</Button>
-            </div>
+            <SearchFilters />
+
+            {/* All Companies Section with Pagination */}
+            <section>
+              <h3 className="text-lg font-medium mb-4">All Companies</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedCompanies.map((company, index) => (
+                  <CompanyCard key={index} {...company} />
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                  disabled={currentPage === 0}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {currentPage + 1} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
+                  }
+                  disabled={currentPage === totalPages - 1}
+                >
+                  Next
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </section>
           </div>
         </div>
       </main>
