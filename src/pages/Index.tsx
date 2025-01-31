@@ -87,21 +87,13 @@ const ALL_COMPANIES = [
     industry: "Technology",
     country: "United States",
   },
-  {
-    name: "Sustainable Foods",
-    website: "www.sustainablefoods.com",
-    certificationLevel: "Silver",
-    employeeCount: "500-1000",
-    industry: "Food & Beverage",
-    country: "France",
-  },
 ];
 
 const Index = () => {
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
-  const companiesPerPage = 10;
+  const companiesPerPage = 9;
 
   const totalPages = Math.ceil(ALL_COMPANIES.length / companiesPerPage);
   const paginatedCompanies = ALL_COMPANIES.slice(
@@ -111,7 +103,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
+      <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-primary">CertifyDB</h1>
@@ -134,7 +126,7 @@ const Index = () => {
 
           <div className="flex-1 space-y-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Certified Companies</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Certified Companies</h2>
               <Button
                 variant="outline"
                 className="md:hidden"
@@ -144,9 +136,9 @@ const Index = () => {
               </Button>
             </div>
 
-            <section>
-              <h3 className="text-lg font-medium mb-4">Latest Verified Companies</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section className="bg-white rounded-lg p-6 shadow-md">
+              <h3 className="text-lg font-medium mb-6 text-gray-900">Latest Verified Companies</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {LATEST_COMPANIES.map((company, index) => (
                   <CompanyCard key={index} {...company} />
                 ))}
@@ -156,16 +148,17 @@ const Index = () => {
             <SearchFilters />
 
             {/* Pagination Controls */}
-            <div className="flex justify-center items-center gap-4">
+            <div className="flex justify-center items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
                 disabled={currentPage === 0}
+                className="hover:bg-primary-light"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
               </Button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm font-medium text-gray-700">
                 Page {currentPage + 1} of {totalPages}
               </span>
               <Button
@@ -174,14 +167,15 @@ const Index = () => {
                   setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
                 }
                 disabled={currentPage === totalPages - 1}
+                className="hover:bg-primary-light"
               >
                 Next
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
 
-            <section>
-              <h3 className="text-lg font-medium mb-4">All Companies</h3>
+            <section className="bg-white rounded-lg p-6 shadow-md">
+              <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedCompanies.map((company, index) => (
                   <CompanyCard key={index} {...company} />

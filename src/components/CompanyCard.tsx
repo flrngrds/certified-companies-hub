@@ -23,50 +23,50 @@ export const CompanyCard = ({
   isNew = false,
 }: CompanyCardProps) => {
   return (
-    <Card className="w-full hover:shadow-lg transition-shadow duration-200">
+    <Card className="w-full hover:shadow-lg transition-shadow duration-200 border-2">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex flex-col">
-          <h3 className="font-semibold text-lg">{name}</h3>
+          <h3 className="font-semibold text-lg text-gray-900">{name}</h3>
           {isNew && (
-            <Badge variant="outline" className="bg-success-light text-success w-fit mt-2">
+            <Badge variant="outline" className="bg-success-light text-success w-fit mt-2 font-medium">
               Recently Added
             </Badge>
           )}
         </div>
         <Badge
           variant="secondary"
-          className="bg-primary-light text-primary font-medium"
+          className="bg-primary-light text-primary font-medium border border-primary/20"
         >
           {certificationLevel}
         </Badge>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex items-center text-secondary">
-          <Globe className="h-4 w-4 mr-2" />
+      <CardContent className="space-y-3">
+        <div className="flex items-center text-gray-700">
+          <Globe className="h-4 w-4 mr-2 text-primary" />
           <a
             href={website}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:text-primary-hover"
+            className="text-primary hover:text-primary-hover font-medium"
           >
             {website}
           </a>
         </div>
-        <div className="flex items-center text-secondary">
-          <Users className="h-4 w-4 mr-2" />
+        <div className="flex items-center text-gray-700">
+          <Users className="h-4 w-4 mr-2 text-primary" />
           <span>{employeeCount} employees</span>
         </div>
-        <div className="flex items-center text-secondary">
-          <Building2 className="h-4 w-4 mr-2" />
+        <div className="flex items-center text-gray-700">
+          <Building2 className="h-4 w-4 mr-2 text-primary" />
           <span>{industry}</span>
         </div>
-        <div className="flex items-center text-secondary">
-          <MapPin className="h-4 w-4 mr-2" />
+        <div className="flex items-center text-gray-700">
+          <MapPin className="h-4 w-4 mr-2 text-primary" />
           <span>{country}</span>
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full hover:bg-primary hover:text-white transition-colors">
           See Details
         </Button>
       </CardFooter>
