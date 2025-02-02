@@ -5,6 +5,7 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu, ArrowLeft, ArrowRight, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -115,6 +116,7 @@ const ALL_COMPANIES = [
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedDashboard, setSelectedDashboard] = useState("certified");
@@ -133,7 +135,11 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-black">VadiBase</h1>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" className="hover:bg-primary-light">
+              <Button 
+                variant="ghost" 
+                className="hover:bg-primary-light"
+                onClick={() => navigate('/profile')}
+              >
                 <User className="h-5 w-5 text-primary" />
               </Button>
               <Button variant="ghost" className="md:hidden">
@@ -146,14 +152,12 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
-          <aside
-            className={`md:w-64 flex-shrink-0 transition-all duration-200 ease-in-out ${
-              showFilters ? "block" : "hidden md:block"
-            }`}
-          >
+          <aside className={`md:w-64 flex-shrink-0 transition-all duration-200 ease-in-out ${
+            showFilters ? "block" : "hidden md:block"
+          }`}>
             <div className="w-full space-y-6 bg-white p-4 rounded-lg shadow-sm mb-6">
               <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full bg-white">
                   <SelectValue placeholder="Select Dashboard" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,7 +171,7 @@ const Index = () => {
 
           <div className="flex-1 space-y-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Certified Companies</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
               <Button
                 variant="outline"
                 className="md:hidden"
@@ -175,6 +179,12 @@ const Index = () => {
               >
                 {showFilters ? "Hide Filters" : "Show Filters"}
               </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {LATEST_COMPANIES.map((company, index) => (
+                <CompanyCard key={index} {...company} />
+              ))}
             </div>
 
             <SearchFilters />
@@ -187,7 +197,6 @@ const Index = () => {
                 ))}
               </div>
               
-              {/* Pagination Controls */}
               <div className="flex justify-center items-center gap-4 mt-6">
                 {currentPage > 0 && (
                   <Button
