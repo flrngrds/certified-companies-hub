@@ -4,7 +4,20 @@ import { Filters } from "@/components/Filters";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, ArrowLeft, ArrowRight, User } from "lucide-react";
+import { 
+  Menu, 
+  ArrowLeft, 
+  ArrowRight, 
+  User,
+  Grid,
+  BarChart2,
+  Users,
+  Package,
+  MessageSquare,
+  Mail,
+  Settings,
+  Shield
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -13,6 +26,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 
 const LATEST_COMPANIES = [
   {
