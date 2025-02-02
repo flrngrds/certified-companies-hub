@@ -103,7 +103,7 @@ export const CompanyCard = ({
       <CardFooter>
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full hover:bg-primary hover:text-white transition-colors">
+            <Button className="w-full bg-primary hover:bg-primary-hover text-white">
               See Details
             </Button>
           </DialogTrigger>

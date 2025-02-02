@@ -4,9 +4,15 @@ import { Filters } from "@/components/Filters";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, ArrowLeft, ArrowRight } from "lucide-react";
+import { Menu, ArrowLeft, ArrowRight, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Mock data for demonstration
 const LATEST_COMPANIES = [
   {
     name: "TechCorp Solutions",
@@ -111,6 +117,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
+  const [selectedDashboard, setSelectedDashboard] = useState("certified");
   const companiesPerPage = 9;
 
   const totalPages = Math.ceil(ALL_COMPANIES.length / companiesPerPage);
@@ -124,10 +131,15 @@ const Index = () => {
       <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-primary">CertifyDB</h1>
-            <Button variant="ghost">
-              <Menu className="h-6 w-6" />
-            </Button>
+            <h1 className="text-2xl font-bold text-black">VadiBase</h1>
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" className="hover:bg-primary-light">
+                <User className="h-5 w-5 text-primary" />
+              </Button>
+              <Button variant="ghost" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -139,6 +151,17 @@ const Index = () => {
               showFilters ? "block" : "hidden md:block"
             }`}
           >
+            <div className="w-full space-y-6 bg-white p-4 rounded-lg shadow-sm mb-6">
+              <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Dashboard" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="certified">Certified-EcoVadis</SelectItem>
+                  <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Filters />
           </aside>
 
@@ -154,43 +177,7 @@ const Index = () => {
               </Button>
             </div>
 
-            <section className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-medium mb-6 text-gray-900">Latest Verified Companies</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {LATEST_COMPANIES.map((company, index) => (
-                  <CompanyCard key={index} {...company} />
-                ))}
-              </div>
-            </section>
-
             <SearchFilters />
-
-            {/* Pagination Controls */}
-            <div className="flex justify-center items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                disabled={currentPage === 0}
-                className="hover:bg-primary-light"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Previous
-              </Button>
-              <span className="text-sm font-medium text-gray-700">
-                Page {currentPage + 1} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
-                }
-                disabled={currentPage === totalPages - 1}
-                className="hover:bg-primary-light"
-              >
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
 
             <section className="bg-white rounded-lg p-6 shadow-md">
               <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
@@ -198,6 +185,35 @@ const Index = () => {
                 {paginatedCompanies.map((company, index) => (
                   <CompanyCard key={index} {...company} />
                 ))}
+              </div>
+              
+              {/* Pagination Controls */}
+              <div className="flex justify-center items-center gap-4 mt-6">
+                {currentPage > 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                    className="hover:bg-primary hover:text-white"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Previous
+                  </Button>
+                )}
+                <span className="text-sm font-medium text-gray-700">
+                  Page {currentPage + 1} of {totalPages}
+                </span>
+                {currentPage < totalPages - 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
+                    }
+                    className="hover:bg-primary hover:text-white"
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
               </div>
             </section>
           </div>
