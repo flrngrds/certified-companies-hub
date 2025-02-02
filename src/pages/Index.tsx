@@ -16,6 +16,8 @@ const LATEST_COMPANIES = [
     industry: "Technology",
     country: "United States",
     isNew: true,
+    logo: "/placeholder.svg",
+    description: "Leading provider of innovative technology solutions for enterprise businesses.",
   },
   {
     name: "Green Energy Co",
@@ -25,6 +27,8 @@ const LATEST_COMPANIES = [
     industry: "Energy",
     country: "Germany",
     isNew: true,
+    logo: "/placeholder.svg",
+    description: "Pioneering sustainable energy solutions for a greener future.",
   },
   {
     name: "BuildRight Construction",
@@ -34,6 +38,8 @@ const LATEST_COMPANIES = [
     industry: "Construction",
     country: "United Kingdom",
     isNew: true,
+    logo: "/placeholder.svg",
+    description: "Expert construction services with a focus on quality and sustainability.",
   },
 ];
 
@@ -46,6 +52,8 @@ const ALL_COMPANIES = [
     employeeCount: "500-1000",
     industry: "Healthcare",
     country: "Canada",
+    logo: "/placeholder.svg",
+    description: "Innovative healthcare solutions provider focused on patient care.",
   },
   {
     name: "Global Logistics",
@@ -54,6 +62,8 @@ const ALL_COMPANIES = [
     employeeCount: "1000+",
     industry: "Transportation",
     country: "France",
+    logo: "/placeholder.svg",
+    description: "Leading logistics provider with a global reach.",
   },
   {
     name: "EcoFriendly Solutions",
@@ -62,6 +72,8 @@ const ALL_COMPANIES = [
     employeeCount: "100-500",
     industry: "Environmental",
     country: "Australia",
+    logo: "/placeholder.svg",
+    description: "Committed to sustainable practices and eco-friendly solutions.",
   },
   {
     name: "Digital Innovations",
@@ -70,6 +82,8 @@ const ALL_COMPANIES = [
     employeeCount: "100-500",
     industry: "Technology",
     country: "Japan",
+    logo: "/placeholder.svg",
+    description: "Transforming businesses through digital innovation.",
   },
   {
     name: "Smart Manufacturing",
@@ -78,6 +92,8 @@ const ALL_COMPANIES = [
     employeeCount: "500-1000",
     industry: "Manufacturing",
     country: "Germany",
+    logo: "/placeholder.svg",
+    description: "Leading the way in smart manufacturing solutions.",
   },
   {
     name: "Cloud Services Pro",
@@ -86,6 +102,8 @@ const ALL_COMPANIES = [
     employeeCount: "100-500",
     industry: "Technology",
     country: "United States",
+    logo: "/placeholder.svg",
+    description: "Providing top-notch cloud services for businesses.",
   },
 ];
 

@@ -2,6 +2,13 @@ import { Building2, Globe, Users, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface CompanyCardProps {
   name: string;
@@ -11,6 +18,8 @@ interface CompanyCardProps {
   industry: string;
   country: string;
   isNew?: boolean;
+  logo?: string;
+  description?: string;
 }
 
 export const CompanyCard = ({
@@ -21,8 +30,9 @@ export const CompanyCard = ({
   industry,
   country,
   isNew = false,
+  logo = "/placeholder.svg",
+  description = "No description available.",
 }: CompanyCardProps) => {
-  // Function to determine badge color based on certification level
   const getCertificationColor = (level: string) => {
     switch (level.toLowerCase()) {
       case 'gold':
@@ -41,13 +51,22 @@ export const CompanyCard = ({
   return (
     <Card className="w-full hover:shadow-lg transition-shadow duration-200 border-2">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex flex-col">
-          <h3 className="font-semibold text-lg text-gray-900">{name}</h3>
-          {isNew && (
-            <Badge variant="outline" className="bg-success-light text-success w-fit mt-2 font-medium">
-              Recently Added
-            </Badge>
-          )}
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+            <img
+              src={logo}
+              alt={`${name} logo`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex flex-col">
+            <h3 className="font-semibold text-lg text-gray-900">{name}</h3>
+            {isNew && (
+              <Badge variant="outline" className="bg-success-light text-success w-fit mt-2 font-medium">
+                Recently Added
+              </Badge>
+            )}
+          </div>
         </div>
         <Badge
           variant="secondary"
@@ -82,9 +101,64 @@ export const CompanyCard = ({
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full hover:bg-primary hover:text-white transition-colors">
-          See Details
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full hover:bg-primary hover:text-white transition-colors">
+              See Details
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-4">
+                <img
+                  src={logo}
+                  alt={`${name} logo`}
+                  className="w-12 h-12 rounded-full"
+                />
+                {name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">{description}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700">Industry</h4>
+                    <p className="text-sm">{industry}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700">Location</h4>
+                    <p className="text-sm">{country}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700">Size</h4>
+                    <p className="text-sm">{employeeCount} employees</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700">Certification</h4>
+                    <Badge
+                      variant="secondary"
+                      className={`mt-1 ${getCertificationColor(certificationLevel)}`}
+                    >
+                      {certificationLevel}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Website</h4>
+                  <a
+                    href={website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:text-primary-hover text-sm font-medium"
+                  >
+                    {website}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   );
