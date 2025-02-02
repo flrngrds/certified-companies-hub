@@ -99,3 +99,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .select-content {
+    @apply bg-white dark:bg-gray-800 border shadow-lg;
+  }
+}
