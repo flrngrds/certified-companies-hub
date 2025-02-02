@@ -37,12 +37,6 @@ export default {
           DEFAULT: "#22C55E",
           light: "#DCFCE7",
         },
-        sidebar: {
-          DEFAULT: "#004D45",
-          hover: "#006A60",
-          text: "#A3B3B0",
-          badge: "#22C55E",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
