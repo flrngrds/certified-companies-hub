@@ -130,25 +130,75 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-black">VadiBase</h1>
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                className="hover:bg-primary-light"
-                onClick={() => navigate('/profile')}
-              >
-                <User className="h-5 w-5 text-primary" />
-              </Button>
-              <Button variant="ghost" className="md:hidden">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SidebarProvider>
+        <Sidebar variant="inset" className="bg-sidebar">
+          <SidebarHeader>
+            <h2 className="px-4 text-xl font-semibold text-white">VadiBase</h2>
+          </SidebarHeader>
+          
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel className="sidebar-section-title">MENU</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Overview">
+                    <Grid className="text-sidebar-text" />
+                    <span>Overview</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Statistics">
+                    <BarChart2 className="text-sidebar-text" />
+                    <span>Statistics</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Customers">
+                    <Users className="text-sidebar-text" />
+                    <span>Customers</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Product">
+                    <Package className="text-sidebar-text" />
+                    <span>Product</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Messages">
+                    <MessageSquare className="text-sidebar-text" />
+                    <span>Messages</span>
+                    <span className="sidebar-badge">13</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Transactions">
+                    <Mail className="text-sidebar-text" />
+                    <span>Transactions</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel className="sidebar-section-title">GENERAL</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Settings">
+                    <Settings className="text-sidebar-text" />
+                    <span>Settings</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip="Security">
+                    <Shield className="text-sidebar-text" />
+                    <span>Security</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
@@ -228,6 +278,7 @@ const Index = () => {
           </div>
         </div>
       </main>
+      </SidebarProvider>
     </div>
   );
 };
