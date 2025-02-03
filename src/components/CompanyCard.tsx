@@ -1,4 +1,4 @@
-import { Building2, Globe, MapPin } from "lucide-react";
+import { Building2, Globe, Users, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ interface CompanyCardProps {
   isNew?: boolean;
   logo?: string;
   description?: string;
+  showAllDetails?: boolean;
 }
 
 export const CompanyCard = ({
@@ -32,6 +33,7 @@ export const CompanyCard = ({
   isNew = false,
   logo = "/placeholder.svg",
   description = "No description available.",
+  showAllDetails = false,
 }: CompanyCardProps) => {
   const getCertificationColor = (level: string) => {
     switch (level.toLowerCase()) {
@@ -87,6 +89,18 @@ export const CompanyCard = ({
             {website}
           </a>
         </div>
+        {showAllDetails && (
+          <>
+            <div className="flex items-center text-gray-700">
+              <Users className="h-4 w-4 mr-2 text-primary" />
+              <span>{employeeCount} employees</span>
+            </div>
+            <div className="flex items-center text-gray-700">
+              <Building2 className="h-4 w-4 mr-2 text-primary" />
+              <span>{industry}</span>
+            </div>
+          </>
+        )}
         <div className="flex items-center text-gray-700">
           <MapPin className="h-4 w-4 mr-2 text-primary" />
           <span>{country}</span>
