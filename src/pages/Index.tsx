@@ -152,12 +152,12 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
-          <aside className={`md:w-64 flex-shrink-0 transition-all duration-200 ease-in-out ${
+          <aside className={`md:w-64 h-screen bg-[#006A60] text-white flex-shrink-0 transition-all duration-200 ease-in-out ${
             showFilters ? "block" : "hidden md:block"
           }`}>
-            <div className="w-full space-y-6 bg-white p-4 rounded-lg shadow-sm mb-6">
+            <div className="w-full space-y-6 p-4 mb-6">
               <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
-                <SelectTrigger className="w-full bg-white">
+                <SelectTrigger className="w-full bg-white text-gray-900">
                   <SelectValue placeholder="Select Dashboard" />
                 </SelectTrigger>
                 <SelectContent>
