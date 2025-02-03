@@ -10,11 +10,11 @@ import {
 
 export const Filters = () => {
   return (
-    <div className="w-full space-y-6 bg-white p-4 rounded-lg shadow-sm">
+    <div className="w-full space-y-6">
       <div className="space-y-4">
-        <h3 className="font-medium">Certification Type</h3>
+        <h3 className="font-medium text-white">Certification Type</h3>
         <Select>
-          <SelectTrigger>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -26,12 +26,12 @@ export const Filters = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-medium">Country</h3>
+        <h3 className="font-medium text-white">Country</h3>
         <div className="space-y-2">
           {["United States", "United Kingdom", "Canada", "Germany", "France", "Japan", "Australia"].map((country) => (
             <div key={country} className="flex items-center space-x-2">
-              <Checkbox id={country} />
-              <label htmlFor={country} className="text-sm text-secondary">
+              <Checkbox id={country} className="border-white/50 data-[state=checked]:bg-white/90 data-[state=checked]:border-white/90" />
+              <label htmlFor={country} className="text-sm text-white/90">
                 {country}
               </label>
             </div>
@@ -40,12 +40,12 @@ export const Filters = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-medium">Company Size</h3>
+        <h3 className="font-medium text-white">Company Size</h3>
         <div className="space-y-2">
           {["1-50", "51-200", "201-500", "501-1000", "1000+"].map((size) => (
             <div key={size} className="flex items-center space-x-2">
-              <Checkbox id={size} />
-              <label htmlFor={size} className="text-sm text-secondary">
+              <Checkbox id={size} className="border-white/50 data-[state=checked]:bg-white/90 data-[state=checked]:border-white/90" />
+              <label htmlFor={size} className="text-sm text-white/90">
                 {size} employees
               </label>
             </div>
@@ -54,12 +54,12 @@ export const Filters = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-medium">Certification Level</h3>
+        <h3 className="font-medium text-white">Certification Level</h3>
         <div className="space-y-2">
           {["Bronze", "Silver", "Gold", "Platinum"].map((level) => (
             <div key={level} className="flex items-center space-x-2">
-              <Checkbox id={level} />
-              <label htmlFor={level} className="text-sm text-secondary">
+              <Checkbox id={level} className="border-white/50 data-[state=checked]:bg-white/90 data-[state=checked]:border-white/90" />
+              <label htmlFor={level} className="text-sm text-white/90">
                 {level}
               </label>
             </div>
@@ -67,7 +67,7 @@ export const Filters = () => {
         </div>
       </div>
 
-      <Button className="w-full">Apply Filters</Button>
+      <Button className="w-full bg-white/10 text-white hover:bg-white/20">Apply Filters</Button>
     </div>
   );
 };

@@ -129,56 +129,57 @@ const Index = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-black">VadiBase</h1>
-            <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gray-50 flex">
+      <aside 
+        className={`fixed left-0 top-0 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out overflow-y-auto ${
+          showFilters ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div className="p-4">
+          <h1 className="text-2xl font-bold text-white mb-8">VadiBase</h1>
+          <div className="space-y-6 mb-6">
+            <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
+              <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
+                <SelectValue placeholder="Select Dashboard" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="certified">Certified-EcoVadis</SelectItem>
+                <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Filters />
+        </div>
+      </aside>
+
+      <div className="flex-1 md:ml-64">
+        <header className="bg-white border-b shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
               <Button 
                 variant="ghost" 
-                className="hover:bg-primary-light"
-                onClick={() => navigate('/profile')}
-              >
-                <User className="h-5 w-5 text-primary" />
-              </Button>
-              <Button variant="ghost" className="md:hidden">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <aside className={`md:w-64 h-screen bg-[#006A60] text-white flex-shrink-0 transition-all duration-200 ease-in-out ${
-            showFilters ? "block" : "hidden md:block"
-          }`}>
-            <div className="w-full space-y-6 p-4 mb-6">
-              <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
-                <SelectTrigger className="w-full bg-white text-gray-900">
-                  <SelectValue placeholder="Select Dashboard" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="certified">Certified-EcoVadis</SelectItem>
-                  <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Filters />
-          </aside>
-
-          <div className="flex-1 space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
-              <Button
-                variant="outline"
                 className="md:hidden"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                {showFilters ? "Hide Filters" : "Show Filters"}
+                <Menu className="h-6 w-6" />
               </Button>
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  className="hover:bg-primary-light"
+                  onClick={() => navigate('/profile')}
+                >
+                  <User className="h-5 w-5 text-primary" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8">
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,8 +227,8 @@ const Index = () => {
               </div>
             </section>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
