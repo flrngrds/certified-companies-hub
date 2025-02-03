@@ -1,4 +1,4 @@
-import { Building2, Globe, Users, MapPin } from "lucide-react";
+import { Building2, Globe, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export const CompanyCard = ({
   };
 
   return (
-    <Card className="w-full hover:shadow-lg transition-shadow duration-200 border-2">
+    <Card className="w-full bg-white hover:shadow-lg transition-shadow duration-200 border-2">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
@@ -88,14 +88,6 @@ export const CompanyCard = ({
           </a>
         </div>
         <div className="flex items-center text-gray-700">
-          <Users className="h-4 w-4 mr-2 text-primary" />
-          <span>{employeeCount} employees</span>
-        </div>
-        <div className="flex items-center text-gray-700">
-          <Building2 className="h-4 w-4 mr-2 text-primary" />
-          <span>{industry}</span>
-        </div>
-        <div className="flex items-center text-gray-700">
           <MapPin className="h-4 w-4 mr-2 text-primary" />
           <span>{country}</span>
         </div>
@@ -107,7 +99,7 @@ export const CompanyCard = ({
               See Details
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-4">
                 <img

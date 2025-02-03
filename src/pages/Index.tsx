@@ -139,10 +139,10 @@ const Index = () => {
           <h1 className="text-2xl font-bold text-white mb-8">VadiBase</h1>
           <div className="space-y-6 mb-6">
             <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
-              <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
+              <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
                 <SelectValue placeholder="Select Dashboard" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="certified">Certified-EcoVadis</SelectItem>
                 <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
               </SelectContent>
@@ -163,13 +163,14 @@ const Index = () => {
               >
                 <Menu className="h-6 w-6" />
               </Button>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 ml-auto">
                 <Button 
                   variant="ghost" 
-                  className="hover:bg-primary-light"
+                  className="hover:bg-primary-light flex items-center gap-2"
                   onClick={() => navigate('/profile')}
                 >
                   <User className="h-5 w-5 text-primary" />
+                  <span className="text-primary">Profile</span>
                 </Button>
               </div>
             </div>

@@ -15,13 +15,13 @@ export const SearchFilters = () => {
       <h2 className="text-lg font-semibold">Search Companies</h2>
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
-          <Input placeholder="Company name..." className="w-full" />
+          <Input placeholder="Company name..." className="w-full bg-white" />
         </div>
         <Select>
-          <SelectTrigger className="w-full md:w-[200px]">
+          <SelectTrigger className="w-full md:w-[200px] bg-white">
             <SelectValue placeholder="Certification Level" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             <SelectItem value="all">All Levels</SelectItem>
             <SelectItem value="bronze">Bronze</SelectItem>
             <SelectItem value="silver">Silver</SelectItem>
