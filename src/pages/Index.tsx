@@ -13,13 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 const LATEST_COMPANIES = [
   {
@@ -160,7 +153,7 @@ const Index = () => {
       </aside>
 
       <div className="flex-1 md:ml-64">
-        <header className="bg-white border-b shadow-sm sticky top-0 z-10">
+        <header className="bg-white border-b shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Button 
@@ -190,31 +183,17 @@ const Index = () => {
               <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
             </div>
 
-            <div className="relative">
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {LATEST_COMPANIES.map((company, index) => (
-                    <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/5">
-                      <CompanyCard {...company} showAllDetails={false} />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden md:flex" />
-                <CarouselNext className="hidden md:flex" />
-              </Carousel>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {LATEST_COMPANIES.map((company, index) => (
+                <CompanyCard key={index} {...company} showAllDetails={false} />
+              ))}
             </div>
 
             <SearchFilters />
 
             <section className="bg-white rounded-lg p-6 shadow-md">
               <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedCompanies.map((company, index) => (
                   <CompanyCard key={index} {...company} showAllDetails={true} />
                 ))}
