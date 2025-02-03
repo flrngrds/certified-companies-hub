@@ -177,28 +177,28 @@ const Index = () => {
           </div>
         </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
-          </div>
+        <main className="container mx-auto px-4 py-8">
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {LATEST_COMPANIES.map((company, index) => (
-              <CompanyCard key={index} {...company} showAllDetails={false} />
-            ))}
-          </div>
-
-          <SearchFilters />
-
-          <section className="bg-white rounded-lg p-6 shadow-md">
-            <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedCompanies.map((company, index) => (
-                <CompanyCard key={index} {...company} showAllDetails={true} />
+              {LATEST_COMPANIES.map((company, index) => (
+                <CompanyCard key={index} {...company} showAllDetails={false} />
               ))}
             </div>
-            
+
+            <SearchFilters />
+
+            <section className="bg-white rounded-lg p-6 shadow-md">
+              <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedCompanies.map((company, index) => (
+                  <CompanyCard key={index} {...company} showAllDetails={true} />
+                ))}
+              </div>
+              
               <div className="flex justify-center items-center gap-4 mt-6">
                 {currentPage > 0 && (
                   <Button
@@ -226,9 +226,10 @@ const Index = () => {
                   </Button>
                 )}
               </div>
-          </section>
-        </div>
-      </main>
+            </section>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
