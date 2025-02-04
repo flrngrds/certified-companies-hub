@@ -1,20 +1,13 @@
 import { useState } from "react";
-import { CompanyCard } from "@/components/CompanyCard";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filters } from "@/components/Filters";
 import { SearchFilters } from "@/components/SearchFilters";
-import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, ArrowLeft, ArrowRight, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { PricingDialog } from "@/components/PricingDialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Header } from "@/components/Header";
+import { LatestCompanies } from "@/components/LatestCompanies";
+import { CompaniesList } from "@/components/CompaniesList";
 
+// Move these to a separate data file if they grow larger
 const LATEST_COMPANIES = [
   {
     name: "TechCorp Solutions",
@@ -125,7 +118,6 @@ interface FilterState {
 
 const Index = () => {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedDashboard, setSelectedDashboard] = useState("certified");
@@ -212,86 +204,17 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="flex-1 md:ml-64">
-        <header className="sticky top-0 z-20 bg-white border-b shadow-sm">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <Button 
-                variant="ghost" 
-                className="md:hidden"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Menu className="h-6 w-6" />
-              </Button>
-              <div className="flex items-center gap-2 ml-auto">
-                <PricingDialog />
-                <Button 
-                  variant="ghost" 
-                  className="hover:bg-primary-light flex items-center gap-2"
-                  onClick={() => navigate('/profile')}
-                >
-                  <User className="h-5 w-5 text-primary" />
-                  <span className="text-primary">Profile</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-
+        <Header onToggleFilters={() => setShowFilters(!showFilters)} />
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Latest Companies</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {LATEST_COMPANIES.map((company, index) => (
-                <CompanyCard key={index} {...company} showAllDetails={false} />
-              ))}
-            </div>
-
+            <LatestCompanies companies={LATEST_COMPANIES} />
             <SearchFilters onSearch={handleSearch} />
-
-            <section className="bg-white rounded-lg p-6 shadow-md">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-medium text-gray-900">All Companies</h3>
-                <span className="text-sm text-gray-600">
-                  {filteredCompanies.length} EcoVadis-certified companies
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paginatedCompanies.map((company, index) => (
-                  <CompanyCard key={index} {...company} showAllDetails={true} />
-                ))}
-              </div>
-              
-              <div className="flex justify-center items-center gap-4 mt-6">
-                {currentPage > 0 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                    className="hover:bg-primary hover:text-white"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                )}
-                <span className="text-sm font-medium text-gray-700">
-                  Page {currentPage + 1} of {totalPages}
-                </span>
-                {currentPage < totalPages - 1 && (
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
-                    }
-                    className="hover:bg-primary hover:text-white"
-                  >
-                    Next
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                )}
-              </div>
-            </section>
+            <CompaniesList 
+              companies={paginatedCompanies}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </main>
       </div>
