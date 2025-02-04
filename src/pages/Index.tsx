@@ -26,8 +26,12 @@ const Index = () => {
     searchTerm: "",
   });
 
-  const { data: latestCompaniesData, isLoading: isLoadingLatest, error: latestError } = useLatestCompanies();
-  const { data: allCompaniesData, isLoading: isLoadingAll, error: allError } = useAllCompanies(currentPage, COMPANIES_PER_PAGE);
+  const { data: latestCompanies, isLoading: isLoadingLatest, error: latestError } = useLatestCompanies();
+  const { data: allCompaniesData, isLoading: isLoadingAll, error: allError } = useAllCompanies(
+    currentPage,
+    COMPANIES_PER_PAGE,
+    filters
+  );
 
   if (latestError || allError) {
     toast({
@@ -36,20 +40,6 @@ const Index = () => {
       description: "Failed to load companies data. Please try again later.",
     });
   }
-
-  const transformCompanyData = (company: any) => ({
-    name: company.Entreprise,
-    website: company.Website || "N/A",
-    certificationLevel: company.Niveau || "Not Specified",
-    employeeCount: company.Employees?.toString() || "Not Specified",
-    industry: "Not Specified", // Not in the current mapping
-    country: company.Country || "Not Specified",
-    isNew: true, // Could be determined based on "Date de création"
-  });
-
-  const latestCompanies = latestCompaniesData?.map(transformCompanyData) || [];
-  const allCompanies = allCompaniesData?.companies.map(transformCompanyData) || [];
-  const totalPages = Math.ceil((allCompaniesData?.total || 0) / COMPANIES_PER_PAGE);
 
   const handleFilterUpdate = (newFilters: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
@@ -102,16 +92,22 @@ const Index = () => {
         <Header onToggleFilters={() => setShowFilters(!showFilters)} />
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
-            <LatestCompanies 
-              companies={latestCompanies} 
-            />
+            {isLoadingLatest ? (
+              <div>Loading latest companies...</div>
+            ) : (
+              <LatestCompanies companies={latestCompanies || []} />
+            )}
             <SearchFilters onSearch={handleSearch} />
-            <CompaniesList 
-              companies={allCompanies}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            {isLoadingAll ? (
+              <div>Loading all companies...</div>
+            ) : (
+              <CompaniesList 
+                companies={allCompaniesData?.companies || []}
+                currentPage={currentPage}
+                totalPages={Math.ceil((allCompaniesData?.total || 0) / COMPANIES_PER_PAGE)}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </div>
         </main>
       </div>
