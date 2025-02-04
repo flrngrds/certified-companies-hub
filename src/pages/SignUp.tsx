@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
@@ -14,15 +14,16 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
       toast({
+        variant: "destructive",
         title: "Error",
         description: "Passwords do not match",
-        variant: "destructive",
       });
       return;
     }
@@ -50,9 +51,9 @@ const SignUp = () => {
       }
     } catch (error: any) {
       toast({
+        variant: "destructive",
         title: "Error",
         description: error.message,
-        variant: "destructive",
       });
     }
   };
