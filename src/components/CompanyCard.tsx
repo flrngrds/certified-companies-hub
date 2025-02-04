@@ -1,4 +1,4 @@
-import { Building2, Globe, Users, MapPin } from "lucide-react";
+import { Building2, Globe, Users, MapPin, Calendar, Link2, Clock, Tag, Linkedin, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface CompanyCardProps {
   name: string;
@@ -20,6 +21,12 @@ interface CompanyCardProps {
   isNew?: boolean;
   logo?: string;
   description?: string;
+  publicationDate?: string;
+  sourceLink?: string;
+  lastVerified?: string;
+  keywords?: string;
+  linkedin?: string;
+  annualRevenue?: string;
   showAllDetails?: boolean;
 }
 
@@ -33,6 +40,12 @@ export const CompanyCard = ({
   isNew = false,
   logo = "/placeholder.svg",
   description = "No description available.",
+  publicationDate,
+  sourceLink,
+  lastVerified,
+  keywords,
+  linkedin,
+  annualRevenue,
   showAllDetails = false,
 }: CompanyCardProps) => {
   const getCertificationColor = (level: string) => {
@@ -126,7 +139,35 @@ export const CompanyCard = ({
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-4">
-                <p className="text-sm text-gray-600">{description}</p>
+                {/* Certification Information Section */}
+                <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold text-sm text-gray-900">Certification Information</h4>
+                  <div className="grid gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Badge className={getCertificationColor(certificationLevel)}>
+                        {certificationLevel}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span>Published: {publicationDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link2 className="h-4 w-4 text-gray-500" />
+                      <a href={sourceLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
+                        Source Link
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span>Last Verified: {lastVerified}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Company Details Section */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-semibold text-sm text-gray-700">Industry</h4>
@@ -141,25 +182,51 @@ export const CompanyCard = ({
                     <p className="text-sm">{employeeCount} employees</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-gray-700">Certification</h4>
-                    <Badge
-                      variant="secondary"
-                      className={`mt-1 ${getCertificationColor(certificationLevel)}`}
-                    >
-                      {certificationLevel}
-                    </Badge>
+                    <h4 className="font-semibold text-sm text-gray-700">Annual Revenue</h4>
+                    <p className="text-sm">{annualRevenue}</p>
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Website</h4>
-                  <a
-                    href={website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:text-primary-hover text-sm font-medium"
-                  >
-                    {website}
-                  </a>
+
+                <Separator />
+
+                {/* Additional Information */}
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {keywords?.split(',').map((keyword, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {keyword.trim()}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm text-gray-700">Links</h4>
+                    <div className="space-y-2">
+                      <a
+                        href={website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
+                      >
+                        <Globe className="h-4 w-4" />
+                        Website
+                      </a>
+                      {linkedin && (
+                        <a
+                          href={linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
+                        >
+                          <Linkedin className="h-4 w-4" />
+                          LinkedIn
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

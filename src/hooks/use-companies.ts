@@ -11,6 +11,12 @@ export interface Company {
   isNew?: boolean;
   logo?: string;
   description?: string;
+  publicationDate?: string;
+  sourceLink?: string;
+  lastVerified?: string;
+  keywords?: string;
+  linkedin?: string;
+  annualRevenue?: string;
 }
 
 const transformCompanyData = (data: any): Company => ({
@@ -23,8 +29,14 @@ const transformCompanyData = (data: any): Company => ({
   isNew: data["Date de création"] ? 
     new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
     false,
-  logo: data.Logo || '/placeholder.svg',
-  description: data.Description || 'No description available.'
+  logo: data.image || '/placeholder.svg',
+  description: data.Description || 'No description available.',
+  publicationDate: data["Publication source"] || 'Not Specified',
+  sourceLink: data.Lien || '#',
+  lastVerified: data["Last verified"] || 'Not Specified',
+  keywords: data.Keywords || 'No keywords available',
+  linkedin: data.LinkedIn || '#',
+  annualRevenue: data["Annual Revenue"] || 'Not Specified'
 });
 
 export const useLatestCompanies = () => {
