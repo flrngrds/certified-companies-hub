@@ -171,6 +171,17 @@ const Index = () => {
     handleFilterUpdate({ searchTerm, certLevel });
   };
 
+  const handleResetFilters = () => {
+    setFilters({
+      industry: "",
+      country: "",
+      companySize: "",
+      certLevel: "",
+      searchTerm: "",
+    });
+    setCurrentPage(0);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -192,7 +203,10 @@ const Index = () => {
               </SelectContent>
             </Select>
           </div>
-          <Filters onFilterChange={handleFilterUpdate} />
+          <Filters 
+            onFilterChange={handleFilterUpdate} 
+            onResetFilters={handleResetFilters}
+          />
         </div>
       </aside>
 
@@ -238,7 +252,12 @@ const Index = () => {
             <SearchFilters onSearch={handleSearch} />
 
             <section className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-medium text-gray-900">All Companies</h3>
+                <span className="text-sm text-gray-600">
+                  {filteredCompanies.length} EcoVadis-certified companies
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedCompanies.map((company, index) => (
                   <CompanyCard key={index} {...company} showAllDetails={true} />

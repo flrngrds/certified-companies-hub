@@ -17,9 +17,10 @@ interface FiltersProps {
     companySize?: string;
     certLevel?: string;
   }) => void;
+  onResetFilters: () => void;
 }
 
-export const Filters = ({ onFilterChange }: FiltersProps) => {
+export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
   const [filters, setFilters] = useState({
     industry: "",
     country: "",
@@ -35,8 +36,35 @@ export const Filters = ({ onFilterChange }: FiltersProps) => {
     onFilterChange(filters);
   };
 
+  const handleResetFilters = () => {
+    setFilters({
+      industry: "",
+      country: "",
+      companySize: "",
+      certLevel: "",
+    });
+    onResetFilters();
+  };
+
   return (
     <div className="w-full space-y-6">
+      <div className="space-y-4">
+        <h3 className="font-medium text-white">Industry</h3>
+        <Select value={filters.industry} onValueChange={(value) => handleFilterChange("industry", value)}>
+          <SelectTrigger className="bg-white text-gray-900 border-white/20">
+            <SelectValue placeholder="Select industry" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="technology">Technology</SelectItem>
+            <SelectItem value="healthcare">Healthcare</SelectItem>
+            <SelectItem value="manufacturing">Manufacturing</SelectItem>
+            <SelectItem value="energy">Energy</SelectItem>
+            <SelectItem value="construction">Construction</SelectItem>
+            <SelectItem value="transportation">Transportation</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-4">
         <h3 className="font-medium text-white">Certification Level</h3>
         <RadioGroup 
@@ -53,23 +81,6 @@ export const Filters = ({ onFilterChange }: FiltersProps) => {
             </div>
           ))}
         </RadioGroup>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="font-medium text-white">Industry</h3>
-        <Select value={filters.industry} onValueChange={(value) => handleFilterChange("industry", value)}>
-          <SelectTrigger className="bg-white text-gray-900 border-white/20">
-            <SelectValue placeholder="Select industry" />
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            <SelectItem value="technology">Technology</SelectItem>
-            <SelectItem value="healthcare">Healthcare</SelectItem>
-            <SelectItem value="manufacturing">Manufacturing</SelectItem>
-            <SelectItem value="energy">Energy</SelectItem>
-            <SelectItem value="construction">Construction</SelectItem>
-            <SelectItem value="transportation">Transportation</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="space-y-4">
@@ -112,12 +123,21 @@ export const Filters = ({ onFilterChange }: FiltersProps) => {
         </RadioGroup>
       </div>
 
-      <Button 
-        className="w-full bg-white/10 text-white hover:bg-white/20"
-        onClick={handleApplyFilters}
-      >
-        Apply Filters
-      </Button>
+      <div className="space-y-2">
+        <Button 
+          className="w-full bg-white/10 text-white hover:bg-white/20"
+          onClick={handleApplyFilters}
+        >
+          Apply Filters
+        </Button>
+        <Button 
+          variant="destructive"
+          className="w-full"
+          onClick={handleResetFilters}
+        >
+          Remove Filters
+        </Button>
+      </div>
     </div>
   );
 };
