@@ -116,7 +116,7 @@ const ALL_COMPANIES = [
 ];
 
 interface FilterState {
-  certType: string;
+  industry: string;
   country: string;
   companySize: string;
   certLevel: string;
@@ -130,7 +130,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedDashboard, setSelectedDashboard] = useState("certified");
   const [filters, setFilters] = useState<FilterState>({
-    certType: "",
+    industry: "",
     country: "",
     companySize: "",
     certLevel: "",
@@ -143,13 +143,15 @@ const Index = () => {
       const matchesSearch = !filters.searchTerm || 
         company.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
       const matchesCountry = !filters.country || 
-        company.country.toLowerCase() === filters.country.toLowerCase();
+        company.country.toLowerCase() === filters.country.toLowerCase().replace(/-/g, ' ');
       const matchesSize = !filters.companySize || 
         company.employeeCount === filters.companySize;
       const matchesLevel = !filters.certLevel || 
         company.certificationLevel.toLowerCase() === filters.certLevel.toLowerCase();
+      const matchesIndustry = !filters.industry || 
+        company.industry.toLowerCase() === filters.industry.toLowerCase();
       
-      return matchesSearch && matchesCountry && matchesSize && matchesLevel;
+      return matchesSearch && matchesCountry && matchesSize && matchesLevel && matchesIndustry;
     });
   };
 
@@ -171,6 +173,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
       <aside 
         className={`fixed left-0 top-0 z-30 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out overflow-y-auto ${
           showFilters ? "translate-x-0" : "-translate-x-full md:translate-x-0"
@@ -193,6 +196,7 @@ const Index = () => {
         </div>
       </aside>
 
+      {/* Main Content */}
       <div className="flex-1 md:ml-64">
         <header className="sticky top-0 z-20 bg-white border-b shadow-sm">
           <div className="container mx-auto px-4 py-4">

@@ -12,7 +12,7 @@ import { useState } from "react";
 
 interface FiltersProps {
   onFilterChange: (filters: {
-    certType?: string;
+    industry?: string;
     country?: string;
     companySize?: string;
     certLevel?: string;
@@ -21,7 +21,7 @@ interface FiltersProps {
 
 export const Filters = ({ onFilterChange }: FiltersProps) => {
   const [filters, setFilters] = useState({
-    certType: "",
+    industry: "",
     country: "",
     companySize: "",
     certLevel: "",
@@ -38,15 +38,36 @@ export const Filters = ({ onFilterChange }: FiltersProps) => {
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
-        <h3 className="font-medium text-white">Certification Type</h3>
-        <Select value={filters.certType} onValueChange={(value) => handleFilterChange("certType", value)}>
+        <h3 className="font-medium text-white">Certification Level</h3>
+        <RadioGroup 
+          value={filters.certLevel} 
+          onValueChange={(value) => handleFilterChange("certLevel", value)} 
+          className="space-y-2"
+        >
+          {["Bronze", "Silver", "Gold", "Platinum"].map((level) => (
+            <div key={level} className="flex items-center space-x-2">
+              <RadioGroupItem value={level.toLowerCase()} id={level} className="border-white/50 text-white" />
+              <Label htmlFor={level} className="text-sm text-white/90">
+                {level}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="font-medium text-white">Industry</h3>
+        <Select value={filters.industry} onValueChange={(value) => handleFilterChange("industry", value)}>
           <SelectTrigger className="bg-white text-gray-900 border-white/20">
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder="Select industry" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="iso">ISO Certification</SelectItem>
-            <SelectItem value="quality">Quality Management</SelectItem>
-            <SelectItem value="environmental">Environmental</SelectItem>
+            <SelectItem value="technology">Technology</SelectItem>
+            <SelectItem value="healthcare">Healthcare</SelectItem>
+            <SelectItem value="manufacturing">Manufacturing</SelectItem>
+            <SelectItem value="energy">Energy</SelectItem>
+            <SelectItem value="construction">Construction</SelectItem>
+            <SelectItem value="transportation">Transportation</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -85,24 +106,6 @@ export const Filters = ({ onFilterChange }: FiltersProps) => {
               <RadioGroupItem value={size} id={size} className="border-white/50 text-white" />
               <Label htmlFor={size} className="text-sm text-white/90">
                 {size} employees
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="font-medium text-white">Certification Level</h3>
-        <RadioGroup 
-          value={filters.certLevel} 
-          onValueChange={(value) => handleFilterChange("certLevel", value)} 
-          className="space-y-2"
-        >
-          {["Bronze", "Silver", "Gold", "Platinum"].map((level) => (
-            <div key={level} className="flex items-center space-x-2">
-              <RadioGroupItem value={level.toLowerCase()} id={level} className="border-white/50 text-white" />
-              <Label htmlFor={level} className="text-sm text-white/90">
-                {level}
               </Label>
             </div>
           ))}
