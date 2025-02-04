@@ -20,7 +20,9 @@ const transformCompanyData = (data: any): Company => ({
   employeeCount: data.Employees?.toString() || 'Not Specified',
   industry: data.Industry || 'Not Specified',
   country: data.Country || 'Not Specified',
-  isNew: new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+  isNew: data["Date de création"] ? 
+    new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
+    false,
   logo: data.Logo || '/placeholder.svg',
   description: data.Description || 'No description available.'
 });
@@ -67,11 +69,14 @@ export const useAllCompanies = (
         .select("*", { count: "exact" });
 
       // Apply filters
-      if (filters?.certLevel) {
+      if (filters?.certLevel && filters.certLevel !== 'all') {
         query = query.eq('Niveau', filters.certLevel);
       }
       if (filters?.country) {
         query = query.eq('Country', filters.country);
+      }
+      if (filters?.industry) {
+        query = query.eq('Industry', filters.industry);
       }
       if (filters?.companySize) {
         // Convert size range to numbers for comparison
@@ -87,9 +92,12 @@ export const useAllCompanies = (
       }
 
       // Add pagination
+      const from = page * limit;
+      const to = from + limit - 1;
+      
       const { data, error, count } = await query
         .order('Entreprise')
-        .range(page * limit, (page + 1) * limit - 1);
+        .range(from, to);
 
       if (error) {
         console.error("Error fetching all companies:", error);
