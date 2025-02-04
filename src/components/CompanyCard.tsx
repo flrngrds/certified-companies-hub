@@ -126,7 +126,7 @@ export const CompanyCard = ({
               See Details
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-white">
+          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-4">
                 <img

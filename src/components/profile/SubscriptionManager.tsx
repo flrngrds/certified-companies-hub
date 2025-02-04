@@ -14,25 +14,25 @@ export const SubscriptionManager = () => {
             Get Started
           </Button>
           <h4 className="font-semibold mb-4">Features</h4>
-          <ul className="space-y-3">
+          <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Access to EcoVadis-Certified company database</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Access to database of verified but not certified companies</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Advanced search and filtering options</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Detailed company profile</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Real-Time updates</span>
             </li>
           </ul>
@@ -49,37 +49,37 @@ export const SubscriptionManager = () => {
             Get Started
           </Button>
           <h4 className="font-semibold mb-4">Features</h4>
-          <ul className="space-y-3">
+          <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Access to EcoVadis-Certified company database</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Access to database of verified but not certified companies</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Advanced search and filtering options</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Detailed company profile</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Real-Time updates</span>
             </li>
           </ul>
           <div className="mt-4">
             <h4 className="font-semibold mb-3">Everything our Basic plan plus..</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3 text-xs">
               <li className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-orange-400" />
+                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
                 <span>Email alerts for new added companies</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-orange-400" />
+                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
                 <span>Priority support</span>
               </li>
             </ul>
@@ -97,37 +97,37 @@ export const SubscriptionManager = () => {
             Get Started
           </Button>
           <h4 className="font-semibold mb-4">Features</h4>
-          <ul className="space-y-3">
+          <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Access to EcoVadis-Certified company database</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Access to database of verified but not certified companies</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Advanced search and filtering options</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Detailed company profile</span>
             </li>
             <li className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Real-Time updates</span>
             </li>
           </ul>
           <div className="mt-4">
             <h4 className="font-semibold mb-3">Everything our Basic plan plus..</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3 text-xs">
               <li className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-orange-400" />
+                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
                 <span>Email alerts for new added companies</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-orange-400" />
+                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
                 <span>Priority support</span>
               </li>
             </ul>

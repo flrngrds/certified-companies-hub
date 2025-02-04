@@ -132,7 +132,7 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
         </Button>
         <Button 
           variant="destructive"
-          className="w-full"
+          className="w-full bg-red-100 hover:bg-red-200 text-red-600"
           onClick={handleResetFilters}
         >
           Remove Filters

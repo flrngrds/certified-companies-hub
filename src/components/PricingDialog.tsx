@@ -17,7 +17,7 @@ export const PricingDialog = () => {
           View Pricing
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[900px]">
+      <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pricing Plans</DialogTitle>
           <DialogDescription>
