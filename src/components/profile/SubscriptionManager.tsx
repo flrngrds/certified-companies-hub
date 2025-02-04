@@ -1,49 +1,137 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Check } from "lucide-react";
 
 export const SubscriptionManager = () => {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-2">Basic</h3>
-          <p className="text-2xl font-bold mb-4">$9.99<span className="text-sm font-normal">/month</span></p>
-          <ul className="space-y-2 mb-6">
-            <li>✓ Basic features</li>
-            <li>✓ Limited access</li>
-            <li>✓ Email support</li>
-          </ul>
-          <Button className="w-full bg-primary text-white hover:bg-primary-hover">
-            Select Plan
+        <Card className="p-6 relative">
+          <h3 className="text-xl font-semibold mb-2">Basic Plan</h3>
+          <p className="text-4xl font-bold mb-1">$299<span className="text-sm font-normal">/month</span></p>
+          <p className="text-sm text-gray-600 mb-4">No commitment</p>
+          <Button className="w-full bg-primary text-white hover:bg-primary-hover mb-6">
+            Get Started
           </Button>
+          <h4 className="font-semibold mb-4">Features</h4>
+          <ul className="space-y-3">
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Access to EcoVadis-Certified company database</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Access to database of verified but not certified companies</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Advanced search and filtering options</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Detailed company profile</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Real-Time updates</span>
+            </li>
+          </ul>
         </Card>
 
-        <Card className="p-6 border-primary">
-          <h3 className="text-xl font-semibold mb-2">Pro</h3>
-          <p className="text-2xl font-bold mb-4">$29.99<span className="text-sm font-normal">/month</span></p>
-          <ul className="space-y-2 mb-6">
-            <li>✓ All Basic features</li>
-            <li>✓ Full access</li>
-            <li>✓ Priority support</li>
-            <li>✓ Advanced analytics</li>
-          </ul>
-          <Button className="w-full bg-primary text-white hover:bg-primary-hover">
-            Select Plan
+        <Card className="p-6 relative border-primary">
+          <div className="absolute -top-3 right-4 bg-orange-400 text-white px-3 py-1 rounded-full text-sm">
+            Most Popular 🎉
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Premium Plan</h3>
+          <p className="text-4xl font-bold mb-1">$279<span className="text-sm font-normal">/month</span></p>
+          <p className="text-sm text-gray-600 mb-4">(billed semi-annually)</p>
+          <Button className="w-full bg-primary text-white hover:bg-primary-hover mb-6">
+            Get Started
           </Button>
+          <h4 className="font-semibold mb-4">Features</h4>
+          <ul className="space-y-3">
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Access to EcoVadis-Certified company database</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Access to database of verified but not certified companies</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Advanced search and filtering options</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Detailed company profile</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Real-Time updates</span>
+            </li>
+          </ul>
+          <div className="mt-4">
+            <h4 className="font-semibold mb-3">Everything our Basic plan plus..</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-orange-400" />
+                <span>Email alerts for new added companies</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-orange-400" />
+                <span>Priority support</span>
+              </li>
+            </ul>
+          </div>
         </Card>
 
-        <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-2">Enterprise</h3>
-          <p className="text-2xl font-bold mb-4">$99.99<span className="text-sm font-normal">/month</span></p>
-          <ul className="space-y-2 mb-6">
-            <li>✓ All Pro features</li>
-            <li>✓ Custom solutions</li>
-            <li>✓ 24/7 support</li>
-            <li>✓ Dedicated manager</li>
-          </ul>
-          <Button className="w-full bg-primary text-white hover:bg-primary-hover">
-            Contact Sales
+        <Card className="p-6 relative">
+          <div className="absolute -top-3 right-4 bg-blue-900 text-white px-3 py-1 rounded-full text-sm">
+            Best Deal 💰
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Enterprise Plan</h3>
+          <p className="text-4xl font-bold mb-1">$249<span className="text-sm font-normal">/month</span></p>
+          <p className="text-sm text-gray-600 mb-4">(billed annually)</p>
+          <Button className="w-full bg-primary text-white hover:bg-primary-hover mb-6">
+            Get Started
           </Button>
+          <h4 className="font-semibold mb-4">Features</h4>
+          <ul className="space-y-3">
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Access to EcoVadis-Certified company database</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Access to database of verified but not certified companies</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Advanced search and filtering options</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Detailed company profile</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Real-Time updates</span>
+            </li>
+          </ul>
+          <div className="mt-4">
+            <h4 className="font-semibold mb-3">Everything our Basic plan plus..</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-orange-400" />
+                <span>Email alerts for new added companies</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-orange-400" />
+                <span>Priority support</span>
+              </li>
+            </ul>
+          </div>
         </Card>
       </div>
     </div>

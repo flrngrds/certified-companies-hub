@@ -1,44 +1,41 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Company {
-  Entreprise: string;
-  Niveau: string;
-  Employees: number;
-  Country: string;
-  Website: string;
-  "Date de création": string;
-}
-
 export const useLatestCompanies = () => {
   return useQuery({
-    queryKey: ["latest-companies"],
+    queryKey: ["latestCompanies"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("EcoVadis-certified")
-        .select("Entreprise, Niveau, Employees, Country, Website, \"Date de création\"")
+        .select("Entreprise, Niveau, Employees, Country, Website")
         .order("Date de création", { ascending: false })
         .limit(3);
 
       if (error) throw error;
-      return data as Company[];
+      return data;
     },
   });
 };
 
-export const useAllCompanies = (page: number, pageSize: number) => {
+export const useAllCompanies = (page: number, limit: number) => {
   return useQuery({
-    queryKey: ["all-companies", page],
+    queryKey: ["allCompanies", page],
     queryFn: async () => {
-      const { data, error, count } = await supabase
+      // First get total count
+      const { count } = await supabase
         .from("EcoVadis-certified")
-        .select("Entreprise, Niveau, Employees, Country, Website", { count: "exact" })
+        .select("*", { count: "exact", head: true });
+
+      // Then get paginated data
+      const { data, error } = await supabase
+        .from("EcoVadis-certified")
+        .select("Entreprise, Niveau, Employees, Country, Website")
         .order("Entreprise")
-        .range(page * pageSize, (page + 1) * pageSize - 1);
+        .range(page * limit, (page + 1) * limit - 1);
 
       if (error) throw error;
       return {
-        companies: data as Company[],
+        companies: data,
         total: count || 0,
       };
     },
