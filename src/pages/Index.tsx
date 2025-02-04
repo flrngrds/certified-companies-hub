@@ -146,7 +146,7 @@ const Index = () => {
         company.country.toLowerCase() === filters.country.toLowerCase().replace(/-/g, ' ');
       const matchesSize = !filters.companySize || 
         company.employeeCount === filters.companySize;
-      const matchesLevel = !filters.certLevel || 
+      const matchesLevel = !filters.certLevel || filters.certLevel === 'all' || 
         company.certificationLevel.toLowerCase() === filters.certLevel.toLowerCase();
       const matchesIndustry = !filters.industry || 
         company.industry.toLowerCase() === filters.industry.toLowerCase();
