@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu, ArrowLeft, ArrowRight, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PricingDialog } from "@/components/PricingDialog";
 import {
   Select,
   SelectContent,
@@ -114,24 +115,64 @@ const ALL_COMPANIES = [
   },
 ];
 
+interface FilterState {
+  certType: string;
+  country: string;
+  companySize: string;
+  certLevel: string;
+  searchTerm: string;
+}
+
 const Index = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedDashboard, setSelectedDashboard] = useState("certified");
+  const [filters, setFilters] = useState<FilterState>({
+    certType: "",
+    country: "",
+    companySize: "",
+    certLevel: "",
+    searchTerm: "",
+  });
   const companiesPerPage = 9;
 
-  const totalPages = Math.ceil(ALL_COMPANIES.length / companiesPerPage);
-  const paginatedCompanies = ALL_COMPANIES.slice(
+  const filterCompanies = (companies: typeof ALL_COMPANIES) => {
+    return companies.filter((company) => {
+      const matchesSearch = !filters.searchTerm || 
+        company.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      const matchesCountry = !filters.country || 
+        company.country.toLowerCase() === filters.country.toLowerCase();
+      const matchesSize = !filters.companySize || 
+        company.employeeCount === filters.companySize;
+      const matchesLevel = !filters.certLevel || 
+        company.certificationLevel.toLowerCase() === filters.certLevel.toLowerCase();
+      
+      return matchesSearch && matchesCountry && matchesSize && matchesLevel;
+    });
+  };
+
+  const filteredCompanies = filterCompanies(ALL_COMPANIES);
+  const totalPages = Math.ceil(filteredCompanies.length / companiesPerPage);
+  const paginatedCompanies = filteredCompanies.slice(
     currentPage * companiesPerPage,
     (currentPage + 1) * companiesPerPage
   );
 
+  const handleFilterUpdate = (newFilters: Partial<FilterState>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setCurrentPage(0);
+  };
+
+  const handleSearch = (searchTerm: string, certLevel: string) => {
+    handleFilterUpdate({ searchTerm, certLevel });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <aside 
-        className={`fixed left-0 top-0 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out overflow-y-auto ${
+        className={`fixed left-0 top-0 z-30 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out overflow-y-auto ${
           showFilters ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -148,12 +189,12 @@ const Index = () => {
               </SelectContent>
             </Select>
           </div>
-          <Filters />
+          <Filters onFilterChange={handleFilterUpdate} />
         </div>
       </aside>
 
       <div className="flex-1 md:ml-64">
-        <header className="bg-white border-b shadow-sm">
+        <header className="sticky top-0 z-20 bg-white border-b shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Button 
@@ -164,6 +205,7 @@ const Index = () => {
                 <Menu className="h-6 w-6" />
               </Button>
               <div className="flex items-center gap-2 ml-auto">
+                <PricingDialog />
                 <Button 
                   variant="ghost" 
                   className="hover:bg-primary-light flex items-center gap-2"
@@ -189,7 +231,7 @@ const Index = () => {
               ))}
             </div>
 
-            <SearchFilters />
+            <SearchFilters onSearch={handleSearch} />
 
             <section className="bg-white rounded-lg p-6 shadow-md">
               <h3 className="text-lg font-medium mb-6 text-gray-900">All Companies</h3>
