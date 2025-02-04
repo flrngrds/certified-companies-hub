@@ -42,10 +42,10 @@ const SignUp = () => {
 
       if (error) throw error;
 
-      if (data) {
+      if (data.user) {
         toast({
           title: "Success",
-          description: "Account created successfully",
+          description: "Account created successfully. Please check your email to verify your account.",
         });
         navigate("/login");
       }
