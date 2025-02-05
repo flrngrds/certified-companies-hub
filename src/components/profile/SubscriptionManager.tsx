@@ -1,8 +1,43 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const SubscriptionManager = () => {
+  const { toast } = useToast();
+
+  const handleSubscribe = async (priceId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "Please log in to subscribe to a plan",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to initiate checkout",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
@@ -10,7 +45,10 @@ export const SubscriptionManager = () => {
           <h3 className="text-xl font-semibold mb-2">Basic Plan</h3>
           <p className="text-4xl font-bold mb-1">$299<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">No commitment</p>
-          <Button className="w-full bg-primary text-white hover:bg-primary-hover mb-6">
+          <Button 
+            className="w-full bg-primary text-white hover:bg-primary-hover mb-6"
+            onClick={() => handleSubscribe('price_1Q6yj0G4TGR1Qn6rC3c2NQ8q')}
+          >
             Get Started
           </Button>
           <h4 className="font-semibold mb-4">Features</h4>
@@ -45,7 +83,10 @@ export const SubscriptionManager = () => {
           <h3 className="text-xl font-semibold mb-2">Premium Plan</h3>
           <p className="text-4xl font-bold mb-1">$279<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">(billed semi-annually)</p>
-          <Button className="w-full bg-primary text-white hover:bg-primary-hover mb-6">
+          <Button 
+            className="w-full bg-primary text-white hover:bg-primary-hover mb-6"
+            onClick={() => handleSubscribe('price_1Q6yjMG4TGR1Qn6rYVFktuZc')}
+          >
             Get Started
           </Button>
           <h4 className="font-semibold mb-4">Features</h4>
@@ -93,7 +134,10 @@ export const SubscriptionManager = () => {
           <h3 className="text-xl font-semibold mb-2">Enterprise Plan</h3>
           <p className="text-4xl font-bold mb-1">$249<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">(billed annually)</p>
-          <Button className="w-full bg-primary text-white hover:bg-primary-hover mb-6">
+          <Button 
+            className="w-full bg-primary text-white hover:bg-primary-hover mb-6"
+            onClick={() => handleSubscribe('price_1Q7FSLG4TGR1Qn6raCjcoEl7')}
+          >
             Get Started
           </Button>
           <h4 className="font-semibold mb-4">Features</h4>
