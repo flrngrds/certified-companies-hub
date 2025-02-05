@@ -24,13 +24,23 @@ const Profile = () => {
         </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="w-full md:w-auto flex space-x-2 bg-white p-1 rounded-lg">
-            <TabsTrigger value="profile" className="flex-1 md:flex-none">Profile Information</TabsTrigger>
-            <TabsTrigger value="subscription" className="flex-1 md:flex-none">Subscription</TabsTrigger>
+          <TabsList className="w-full md:w-auto flex space-x-2 bg-primary/10 p-1 rounded-lg">
+            <TabsTrigger 
+              value="profile" 
+              className="flex-1 md:flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Profile Information
+            </TabsTrigger>
+            <TabsTrigger 
+              value="subscription" 
+              className="flex-1 md:flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Subscription
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <Card>
+            <Card className="bg-white">
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
               </CardHeader>
@@ -41,7 +51,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="subscription">
-            <Card>
+            <Card className="bg-white">
               <CardHeader>
                 <CardTitle>Subscription Management</CardTitle>
               </CardHeader>
