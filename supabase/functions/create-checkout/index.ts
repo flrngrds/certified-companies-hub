@@ -20,11 +20,9 @@ serve(async (req) => {
   try {
     const { priceId } = await req.json()
     
-    // Get the session or user object
     const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
-    const { data } = await supabaseClient.auth.getUser(token)
-    const user = data.user
+    const { data: { user } } = await supabaseClient.auth.getUser(token)
     const email = user?.email
 
     if (!email) {

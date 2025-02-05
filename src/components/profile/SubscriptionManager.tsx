@@ -2,10 +2,34 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 export const SubscriptionManager = () => {
   const { toast } = useToast();
+  const [currentPlan, setCurrentPlan] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setCurrentPlan("free");
+          return;
+        }
+
+        const { data, error } = await supabase.functions.invoke('check-subscription');
+        if (error) throw error;
+        
+        setCurrentPlan(data.plan);
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+        setCurrentPlan("free");
+      }
+    };
+
+    checkSubscription();
+  }, []);
 
   const handleSubscribe = async (priceId: string) => {
     try {
@@ -28,7 +52,7 @@ export const SubscriptionManager = () => {
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
       toast({
         variant: "destructive",
@@ -40,6 +64,10 @@ export const SubscriptionManager = () => {
 
   return (
     <div className="space-y-6">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-2">Current Plan</h3>
+        <p className="text-gray-600">{currentPlan}</p>
+      </div>
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="p-6 relative">
           <h3 className="text-xl font-semibold mb-2">Basic Plan</h3>
