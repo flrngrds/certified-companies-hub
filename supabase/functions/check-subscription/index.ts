@@ -27,7 +27,10 @@ serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser(token)
     
     if (!user?.email) {
-      throw new Error('No email found')
+      return new Response(
+        JSON.stringify({ plan: 'free' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     const customers = await stripe.customers.list({
@@ -78,10 +81,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ plan: 'free' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 200,
       }
     )
   }
