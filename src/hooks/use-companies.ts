@@ -81,14 +81,14 @@ export const useAllCompanies = (
         .select("*", { count: "exact" });
 
       // Apply filters
-      if (filters?.certLevel && filters.certLevel !== 'all') {
-        query = query.eq('Niveau', filters.certLevel);
+      if (filters?.industry) {
+        query = query.ilike('Industry', `%${filters.industry}%`);
       }
       if (filters?.country) {
-        query = query.eq('Country', filters.country);
+        query = query.ilike('Country', `%${filters.country}%`);
       }
-      if (filters?.industry) {
-        query = query.eq('Industry', filters.industry);
+      if (filters?.certLevel) {
+        query = query.ilike('Niveau', `%${filters.certLevel}%`);
       }
       if (filters?.companySize) {
         // Convert size range to numbers for comparison
@@ -96,6 +96,7 @@ export const useAllCompanies = (
         if (max) {
           query = query.gte('Employees', min).lte('Employees', max);
         } else {
+          // Handle "1000+" case
           query = query.gte('Employees', min);
         }
       }

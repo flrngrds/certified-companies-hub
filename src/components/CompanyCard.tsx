@@ -122,7 +122,7 @@ export const CompanyCard = ({
       <CardFooter>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="w-full bg-primary hover:bg-primary-hover text-white">
+            <Button className="w-full bg-[#E2FFC8] hover:bg-[#d1f0b7] text-black">
               See Details
             </Button>
           </DialogTrigger>
@@ -189,43 +189,42 @@ export const CompanyCard = ({
 
                 <Separator />
 
-                {/* Additional Information */}
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {keywords?.split(',').map((keyword, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {keyword.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
+                {/* Links Section */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm text-gray-700">Links</h4>
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-gray-700">Links</h4>
-                    <div className="space-y-2">
+                    <a
+                      href={website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
+                    >
+                      <Globe className="h-4 w-4" />
+                      Website
+                    </a>
+                    {linkedin && (
                       <a
-                        href={website}
+                        href={linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
                       >
-                        <Globe className="h-4 w-4" />
-                        Website
+                        <Linkedin className="h-4 w-4" />
+                        LinkedIn
                       </a>
-                      {linkedin && (
-                        <a
-                          href={linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
-                        >
-                          <Linkedin className="h-4 w-4" />
-                          LinkedIn
-                        </a>
-                      )}
-                    </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Keywords Section */}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {keywords?.split(',').map((keyword, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {keyword.trim()}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </div>
