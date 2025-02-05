@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FiltersProps {
   onFilterChange: (filters: {
@@ -27,12 +29,42 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
     companySize: "",
     certLevel: "",
   });
+  const [currentPlan, setCurrentPlan] = useState<string>("free");
+  const [showPricing, setShowPricing] = useState(false);
+  const { toast } = useToast();
+
+  const checkSubscription = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return "free";
+
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) throw error;
+      
+      return data.plan;
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      return "free";
+    }
+  };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = async () => {
+    const plan = await checkSubscription();
+    setCurrentPlan(plan);
+    
+    if (plan === "free") {
+      toast({
+        title: "Premium Feature",
+        description: "Please upgrade to a paid plan to use the filtering feature.",
+      });
+      setShowPricing(true);
+      return;
+    }
+    
     onFilterChange(filters);
   };
 
@@ -138,6 +170,7 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
           Remove Filters
         </Button>
       </div>
+      {showPricing && <PricingDialog />}
     </div>
   );
 };

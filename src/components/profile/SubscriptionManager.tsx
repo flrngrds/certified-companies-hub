@@ -62,6 +62,31 @@ export const SubscriptionManager = () => {
     }
   };
 
+  const getPlanButton = (planName: string, priceId: string) => {
+    if (currentPlan.toLowerCase() === planName.toLowerCase()) {
+      return (
+        <Button 
+          className="w-full bg-[#E2FFC8] text-gray-700 hover:bg-[#E2FFC8] cursor-not-allowed"
+          disabled
+        >
+          Current Plan
+        </Button>
+      );
+    }
+
+    const isUpgrade = ['Basic', 'Premium', 'Enterprise'].indexOf(planName) > 
+                      ['Basic', 'Premium', 'Enterprise'].indexOf(currentPlan);
+
+    return (
+      <Button 
+        className="w-full bg-primary text-white hover:bg-primary-hover"
+        onClick={() => handleSubscribe(priceId)}
+      >
+        {currentPlan === 'free' ? 'Get Started' : (isUpgrade ? 'Upgrade' : 'Downgrade')}
+      </Button>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="mb-6">
@@ -69,17 +94,12 @@ export const SubscriptionManager = () => {
         <p className="text-gray-600">{currentPlan}</p>
       </div>
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="p-6 relative">
+        <Card className={`p-6 relative ${currentPlan === 'Basic' ? 'bg-gray-50' : ''}`}>
           <h3 className="text-xl font-semibold mb-2">Basic Plan</h3>
           <p className="text-4xl font-bold mb-1">$299<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">No commitment</p>
-          <Button 
-            className="w-full bg-primary text-white hover:bg-primary-hover mb-6"
-            onClick={() => handleSubscribe('price_1Q6yj0G4TGR1Qn6rC3c2NQ8q')}
-          >
-            Get Started
-          </Button>
-          <h4 className="font-semibold mb-4">Features</h4>
+          {getPlanButton('Basic', 'price_1Q6yj0G4TGR1Qn6rC3c2NQ8q')}
+          <h4 className="font-semibold mb-4 mt-6">Features</h4>
           <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -104,20 +124,15 @@ export const SubscriptionManager = () => {
           </ul>
         </Card>
 
-        <Card className="p-6 relative border-primary">
+        <Card className={`p-6 relative border-primary ${currentPlan === 'Premium' ? 'bg-gray-50' : ''}`}>
           <div className="absolute -top-3 right-4 bg-orange-400 text-white px-3 py-1 rounded-full text-sm">
             Most Popular 🎉
           </div>
           <h3 className="text-xl font-semibold mb-2">Premium Plan</h3>
           <p className="text-4xl font-bold mb-1">$279<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">(billed semi-annually)</p>
-          <Button 
-            className="w-full bg-primary text-white hover:bg-primary-hover mb-6"
-            onClick={() => handleSubscribe('price_1Q6yjMG4TGR1Qn6rYVFktuZc')}
-          >
-            Get Started
-          </Button>
-          <h4 className="font-semibold mb-4">Features</h4>
+          {getPlanButton('Premium', 'price_1Q6yjMG4TGR1Qn6rYVFktuZc')}
+          <h4 className="font-semibold mb-4 mt-6">Features</h4>
           <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -139,36 +154,26 @@ export const SubscriptionManager = () => {
               <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Real-Time updates</span>
             </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <span>Email alerts for new added companies</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <span>Priority support</span>
+            </li>
           </ul>
-          <div className="mt-4">
-            <h4 className="font-semibold mb-3">Everything our Basic plan plus..</h4>
-            <ul className="space-y-3 text-xs">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
-                <span>Email alerts for new added companies</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
-                <span>Priority support</span>
-              </li>
-            </ul>
-          </div>
         </Card>
 
-        <Card className="p-6 relative">
+        <Card className={`p-6 relative ${currentPlan === 'Enterprise' ? 'bg-gray-50' : ''}`}>
           <div className="absolute -top-3 right-4 bg-blue-900 text-white px-3 py-1 rounded-full text-sm">
             Best Deal 💰
           </div>
           <h3 className="text-xl font-semibold mb-2">Enterprise Plan</h3>
           <p className="text-4xl font-bold mb-1">$249<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">(billed annually)</p>
-          <Button 
-            className="w-full bg-primary text-white hover:bg-primary-hover mb-6"
-            onClick={() => handleSubscribe('price_1Q7FSLG4TGR1Qn6raCjcoEl7')}
-          >
-            Get Started
-          </Button>
-          <h4 className="font-semibold mb-4">Features</h4>
+          {getPlanButton('Enterprise', 'price_1Q7FSLG4TGR1Qn6raCjcoEl7')}
+          <h4 className="font-semibold mb-4 mt-6">Features</h4>
           <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -190,20 +195,15 @@ export const SubscriptionManager = () => {
               <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               <span>Real-Time updates</span>
             </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <span>Email alerts for new added companies</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <span>Priority support</span>
+            </li>
           </ul>
-          <div className="mt-4">
-            <h4 className="font-semibold mb-3">Everything our Basic plan plus..</h4>
-            <ul className="space-y-3 text-xs">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
-                <span>Email alerts for new added companies</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-orange-400 flex-shrink-0" />
-                <span>Priority support</span>
-              </li>
-            </ul>
-          </div>
         </Card>
       </div>
     </div>
