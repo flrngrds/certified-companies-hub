@@ -81,7 +81,7 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
             <SelectTrigger>
               <SelectValue placeholder="Select certification level" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="platinum">Platinum</SelectItem>
               <SelectItem value="gold">Gold</SelectItem>
               <SelectItem value="silver">Silver</SelectItem>
@@ -103,7 +103,7 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
         </div>
 
         <Button type="submit" className="w-full">
-          Submit Report
+          Report
         </Button>
       </div>
     </form>

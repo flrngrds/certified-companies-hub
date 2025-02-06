@@ -82,38 +82,15 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
-        <h3 className="font-medium text-white">Industry</h3>
-        <Select value={filters.industry} onValueChange={(value) => handleFilterChange("industry", value)}>
-          <SelectTrigger className="bg-white text-gray-900 border-white/20">
-            <SelectValue placeholder="Select industry" />
+        <Select value={filters.certLevel} onValueChange={(value) => handleFilterChange("certLevel", value)}>
+          <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
+            <SelectValue placeholder="Select Dashboard" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="technology">Technology</SelectItem>
-            <SelectItem value="healthcare">Healthcare</SelectItem>
-            <SelectItem value="manufacturing">Manufacturing</SelectItem>
-            <SelectItem value="energy">Energy</SelectItem>
-            <SelectItem value="construction">Construction</SelectItem>
-            <SelectItem value="transportation">Transportation</SelectItem>
+            <SelectItem value="certified">EcoVadis-certified</SelectItem>
+            <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="font-medium text-white">Certification Level</h3>
-        <RadioGroup 
-          value={filters.certLevel} 
-          onValueChange={(value) => handleFilterChange("certLevel", value)} 
-          className="space-y-2"
-        >
-          {["Bronze", "Silver", "Gold", "Platinum"].map((level) => (
-            <div key={level} className="flex items-center space-x-2">
-              <RadioGroupItem value={level.toLowerCase()} id={level} className="border-white/50 text-white" />
-              <Label htmlFor={level} className="text-sm text-white/90">
-                {level}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
       </div>
 
       <div className="space-y-4">
@@ -136,6 +113,23 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
             </div>
           ))}
         </RadioGroup>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="font-medium text-white">Industry</h3>
+        <Select value={filters.industry} onValueChange={(value) => handleFilterChange("industry", value)}>
+          <SelectTrigger className="bg-white text-gray-900 border-white/20">
+            <SelectValue placeholder="Select industry" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="technology">Technology</SelectItem>
+            <SelectItem value="healthcare">Healthcare</SelectItem>
+            <SelectItem value="manufacturing">Manufacturing</SelectItem>
+            <SelectItem value="energy">Energy</SelectItem>
+            <SelectItem value="construction">Construction</SelectItem>
+            <SelectItem value="transportation">Transportation</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-4">
