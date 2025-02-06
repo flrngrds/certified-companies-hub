@@ -82,6 +82,18 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
+        <Select value={filters.certLevel} onValueChange={(value) => handleFilterChange("certLevel", value)}>
+          <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
+            <SelectValue placeholder="EcoVadis-certified" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="certified">EcoVadis-certified</SelectItem>
+            <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-4">
         <h3 className="font-medium text-white">Country</h3>
         <RadioGroup 
           value={filters.country} 

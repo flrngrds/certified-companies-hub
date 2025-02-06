@@ -1,6 +1,10 @@
 import { CompanyCard } from "@/components/CompanyCard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { PricingDialog } from "@/components/PricingDialog";
 
 interface Company {
   name: string;
@@ -29,6 +33,41 @@ export const CompaniesList = ({
   onPageChange,
   totalCompanies 
 }: CompaniesListProps) => {
+  const [showPricing, setShowPricing] = useState(false);
+  const { toast } = useToast();
+  const [currentPlan, setCurrentPlan] = useState<string>("free");
+
+  const checkSubscription = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return "free";
+
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) throw error;
+      
+      return data.plan;
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      return "free";
+    }
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    const plan = await checkSubscription();
+    setCurrentPlan(plan);
+    
+    if (plan === "free") {
+      toast({
+        title: "Premium Feature",
+        description: "Please upgrade to a paid plan to navigate through pages.",
+      });
+      setShowPricing(true);
+      return;
+    }
+    
+    onPageChange(newPage);
+  };
+
   return (
     <section className="bg-white rounded-lg p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
@@ -47,7 +86,7 @@ export const CompaniesList = ({
         {currentPage > 0 && (
           <Button
             variant="outline"
-            onClick={() => onPageChange(Math.max(0, currentPage - 1))}
+            onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
             className="hover:bg-primary hover:text-white"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -60,7 +99,7 @@ export const CompaniesList = ({
         {currentPage < totalPages - 1 && (
           <Button
             variant="outline"
-            onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
+            onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
             className="hover:bg-primary hover:text-white"
           >
             Next
@@ -68,6 +107,7 @@ export const CompaniesList = ({
           </Button>
         )}
       </div>
+      {showPricing && <PricingDialog />}
     </section>
   );
 };
