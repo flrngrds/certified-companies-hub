@@ -1,4 +1,4 @@
-import { Building2, Globe, Users, MapPin, Calendar, Link2, Clock, Tag, Linkedin, DollarSign } from "lucide-react";
+import { Building2, Globe, Users, MapPin, Calendar, Link2, Clock, Tag, Linkedin, AlertOctagon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { ErrorReportForm } from "./ErrorReportForm";
+import { useState } from "react";
 
 interface CompanyCardProps {
   name: string;
@@ -48,6 +50,8 @@ export const CompanyCard = ({
   annualRevenue,
   showAllDetails = false,
 }: CompanyCardProps) => {
+  const [showErrorForm, setShowErrorForm] = useState(false);
+
   const getCertificationColor = (level: string) => {
     switch (level.toLowerCase()) {
       case 'gold':
@@ -72,6 +76,10 @@ export const CompanyCard = ({
               src={logo}
               alt={`${name} logo`}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/placeholder.svg";
+              }}
             />
           </div>
           <div className="flex flex-col">
@@ -127,47 +135,53 @@ export const CompanyCard = ({
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-4">
-                <img
-                  src={logo}
-                  alt={`${name} logo`}
-                  className="w-12 h-12 rounded-full"
-                />
-                {name}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-4">
-                {/* Certification Information Section */}
-                <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-sm text-gray-900">Certification Information</h4>
-                  <div className="grid gap-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Badge className={getCertificationColor(certificationLevel)}>
-                        {certificationLevel}
-                      </Badge>
+            {!showErrorForm ? (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-4">
+                    <img
+                      src={logo}
+                      alt={`${name} logo`}
+                      className="w-12 h-12 rounded-full"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                      }}
+                    />
+                    {name}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-4">
+                    {/* Certification Information Section */}
+                    <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold text-sm text-gray-900">Certification Information</h4>
+                      <div className="grid gap-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Badge className={getCertificationColor(certificationLevel)}>
+                            {certificationLevel}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span>Published: {publicationDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Link2 className="h-4 w-4 text-gray-500" />
+                          <a href={sourceLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
+                            Source Link
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span>Last Verified: {lastVerified}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <span>Published: {publicationDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Link2 className="h-4 w-4 text-gray-500" />
-                      <a href={sourceLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
-                        Source Link
-                      </a>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <span>Last Verified: {lastVerified}</span>
-                    </div>
-                  </div>
-                </div>
 
-                <Separator />
+                    <Separator />
 
-                {/* Company Details Section */}
+                    {/* Company Details Section */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-semibold text-sm text-gray-700">Industry</h4>
@@ -187,9 +201,7 @@ export const CompanyCard = ({
                   </div>
                 </div>
 
-                <Separator />
-
-                {/* Links Section */}
+                    {/* Links Section */}
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm text-gray-700">Links</h4>
                   <div className="space-y-2">
@@ -216,7 +228,7 @@ export const CompanyCard = ({
                   </div>
                 </div>
 
-                {/* Keywords Section */}
+                    {/* Keywords Section */}
                 <div>
                   <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
                   <div className="flex flex-wrap gap-2">
@@ -227,8 +239,25 @@ export const CompanyCard = ({
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
+
+                    {/* Report Error Button */}
+                    <Button
+                      onClick={() => setShowErrorForm(true)}
+                      variant="outline"
+                      className="w-full flex items-center gap-2"
+                    >
+                      <AlertOctagon className="h-4 w-4" />
+                      Report an Error
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <ErrorReportForm
+                companyName={name}
+                onBack={() => setShowErrorForm(false)}
+              />
+            )}
           </DialogContent>
         </Dialog>
       </CardFooter>
