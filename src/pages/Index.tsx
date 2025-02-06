@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filters } from "@/components/Filters";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Header } from "@/components/Header";
@@ -15,7 +14,6 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
-  const [selectedDashboard, setSelectedDashboard] = useState("certified");
   const { toast } = useToast();
   
   const [filters, setFilters] = useState({
@@ -70,17 +68,6 @@ const Index = () => {
       >
         <div className="p-4">
           <h1 className="text-2xl font-bold text-white mb-8">VadiBase</h1>
-          <div className="space-y-6 mb-6">
-            <Select value={selectedDashboard} onValueChange={setSelectedDashboard}>
-              <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
-                <SelectValue placeholder="Select Dashboard" />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="certified">Certified-EcoVadis</SelectItem>
-                <SelectItem value="non-certified">Non-EcoVadis-Certified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <Filters 
             onFilterChange={handleFilterUpdate} 
             onResetFilters={handleResetFilters}
@@ -106,6 +93,7 @@ const Index = () => {
                 currentPage={currentPage}
                 totalPages={Math.ceil((allCompaniesData?.total || 0) / COMPANIES_PER_PAGE)}
                 onPageChange={setCurrentPage}
+                totalCompanies={allCompaniesData?.total}
               />
             )}
           </div>
