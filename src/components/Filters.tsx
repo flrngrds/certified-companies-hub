@@ -84,7 +84,7 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
       <div className="space-y-4">
         <Select value={filters.certLevel} onValueChange={(value) => handleFilterChange("certLevel", value)}>
           <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
-            <SelectValue placeholder="Select Dashboard" />
+            <SelectValue placeholder="EcoVadis-certified" />
           </SelectTrigger>
           <SelectContent className="bg-white">
             <SelectItem value="certified">EcoVadis-certified</SelectItem>

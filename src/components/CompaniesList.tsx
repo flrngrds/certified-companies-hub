@@ -19,20 +19,22 @@ interface CompaniesListProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  totalCompanies?: number;
 }
 
 export const CompaniesList = ({ 
   companies, 
   currentPage, 
   totalPages, 
-  onPageChange 
+  onPageChange,
+  totalCompanies 
 }: CompaniesListProps) => {
   return (
     <section className="bg-white rounded-lg p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-medium text-gray-900">All Companies</h3>
         <span className="text-sm text-gray-600">
-          {companies.length} EcoVadis-certified companies
+          {totalCompanies || companies.length} EcoVadis-certified companies
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
