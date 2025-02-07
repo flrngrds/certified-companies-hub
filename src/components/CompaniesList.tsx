@@ -1,10 +1,18 @@
+
 import { CompanyCard } from "@/components/CompanyCard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { PricingDialog } from "@/components/PricingDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { SubscriptionManager } from "./profile/SubscriptionManager";
 
 interface Company {
   name: string;
@@ -107,7 +115,17 @@ export const CompaniesList = ({
           </Button>
         )}
       </div>
-      {showPricing && <PricingDialog />}
+      <Dialog open={showPricing} onOpenChange={setShowPricing}>
+        <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Pricing Plans</DialogTitle>
+            <DialogDescription>
+              Choose the plan that best fits your needs
+            </DialogDescription>
+          </DialogHeader>
+          <SubscriptionManager />
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
