@@ -22,6 +22,7 @@ export type Database = {
           Employees: number | null
           Entreprise: string
           Founded: number | null
+          id: number
           image: string | null
           Industry: string | null
           Keywords: string | null
@@ -48,6 +49,7 @@ export type Database = {
           Employees?: number | null
           Entreprise: string
           Founded?: number | null
+          id?: number
           image?: string | null
           Industry?: string | null
           Keywords?: string | null
@@ -74,6 +76,7 @@ export type Database = {
           Employees?: number | null
           Entreprise?: string
           Founded?: number | null
+          id?: number
           image?: string | null
           Industry?: string | null
           Keywords?: string | null
@@ -142,15 +145,7 @@ export type Database = {
           publication_date?: string | null
           source_url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "Reported Error_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "EcoVadis-certified"
-            referencedColumns: ["Entreprise"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
