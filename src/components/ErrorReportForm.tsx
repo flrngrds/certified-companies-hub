@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ErrorReportFormProps {
   companyName: string;
@@ -20,12 +23,43 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
   const [source, setSource] = useState("");
   const [certLevel, setCertLevel] = useState("");
   const [pubDate, setPubDate] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send this data to your backend
-    console.log("Error report submitted:", { companyName, source, certLevel, pubDate });
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("Reported Error")
+        .insert({
+          company_name: companyName,
+          source_url: source,
+          certification_level: certLevel,
+          publication_date: pubDate,
+          client_id: companyName, // This links to the EcoVadis-certified table
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      setSubmitted(true);
+      toast({
+        title: "Success",
+        description: "Error report submitted successfully",
+      });
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to submit error report. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -102,8 +136,8 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          Report
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Report"}
         </Button>
       </div>
     </form>

@@ -116,30 +116,41 @@ export type Database = {
       }
       "Reported Error": {
         Row: {
-          Certification: string | null
-          Company: string | null
+          certification_level: string | null
+          client_id: string | null
+          company_name: string | null
           created_at: string
           id: number
-          Publication_Date: string | null
-          Source: string | null
+          publication_date: string | null
+          source_url: string | null
         }
         Insert: {
-          Certification?: string | null
-          Company?: string | null
+          certification_level?: string | null
+          client_id?: string | null
+          company_name?: string | null
           created_at?: string
           id?: number
-          Publication_Date?: string | null
-          Source?: string | null
+          publication_date?: string | null
+          source_url?: string | null
         }
         Update: {
-          Certification?: string | null
-          Company?: string | null
+          certification_level?: string | null
+          client_id?: string | null
+          company_name?: string | null
           created_at?: string
           id?: number
-          Publication_Date?: string | null
-          Source?: string | null
+          publication_date?: string | null
+          source_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Reported Error_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "EcoVadis-certified"
+            referencedColumns: ["Entreprise"]
+          },
+        ]
       }
     }
     Views: {
