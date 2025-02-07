@@ -114,6 +114,33 @@ export type Database = {
         }
         Relationships: []
       }
+      "Reported Error": {
+        Row: {
+          Certification: string | null
+          Company: string | null
+          created_at: string
+          id: number
+          Publication_Date: string | null
+          Source: string | null
+        }
+        Insert: {
+          Certification?: string | null
+          Company?: string | null
+          created_at?: string
+          id?: number
+          Publication_Date?: string | null
+          Source?: string | null
+        }
+        Update: {
+          Certification?: string | null
+          Company?: string | null
+          created_at?: string
+          id?: number
+          Publication_Date?: string | null
+          Source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
