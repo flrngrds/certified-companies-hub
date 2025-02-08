@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -58,7 +57,20 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    
+    // Keep dropdown and radio selection in sync for certification level
+    if (key === "certLevel") {
+      // If selecting from radio group (Bronze, Silver, Gold, Platinum)
+      if (["bronze", "silver", "gold", "platinum"].includes(value.toLowerCase())) {
+        setFilters(prev => ({ ...prev, certLevel: value.toLowerCase() }));
+      }
+      // If selecting from dropdown (certified/non-certified)
+      else if (["certified", "non-certified"].includes(value)) {
+        setFilters(prev => ({ ...prev, certLevel: value }));
+      }
+    }
   };
 
   const handleApplyFilters = async () => {
@@ -90,7 +102,10 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
-        <Select value={filters.certLevel} onValueChange={(value) => handleFilterChange("certLevel", value)}>
+        <Select 
+          value={filters.certLevel} 
+          onValueChange={(value) => handleFilterChange("certLevel", value)}
+        >
           <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
             <SelectValue placeholder="EcoVadis-certified" />
           </SelectTrigger>
