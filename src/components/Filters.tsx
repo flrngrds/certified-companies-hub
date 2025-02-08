@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -9,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -57,19 +58,20 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    
-    // Keep dropdown and radio selection in sync for certification level
     if (key === "certLevel") {
-      // If selecting from radio group (Bronze, Silver, Gold, Platinum)
+      const newFilters = { ...filters };
+      
       if (["bronze", "silver", "gold", "platinum"].includes(value.toLowerCase())) {
-        setFilters(prev => ({ ...prev, certLevel: value.toLowerCase() }));
+        // When selecting from radio buttons, update both certLevel and ensure "certified" is selected in dropdown
+        newFilters.certLevel = value.toLowerCase();
+      } else {
+        // When selecting from dropdown, clear radio selection if "non-certified" is chosen
+        newFilters.certLevel = value === "non-certified" ? "non-certified" : value;
       }
-      // If selecting from dropdown (certified/non-certified)
-      else if (["certified", "non-certified"].includes(value)) {
-        setFilters(prev => ({ ...prev, certLevel: value }));
-      }
+      
+      setFilters(newFilters);
+    } else {
+      setFilters(prev => ({ ...prev, [key]: value }));
     }
   };
 
@@ -99,11 +101,16 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
     onResetFilters();
   };
 
+  // Helper function to determine if a certification level radio should be selected
+  const isCertLevelSelected = (level: string) => {
+    return filters.certLevel === level.toLowerCase() && filters.certLevel !== "non-certified";
+  };
+
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
         <Select 
-          value={filters.certLevel} 
+          value={filters.certLevel === "non-certified" ? "non-certified" : "certified"} 
           onValueChange={(value) => handleFilterChange("certLevel", value)}
         >
           <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
@@ -128,7 +135,8 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
               <RadioGroupItem 
                 value={level.toLowerCase()} 
                 id={level} 
-                className="border-white/50 text-white" 
+                className="border-white/50 text-white"
+                disabled={filters.certLevel === "non-certified"}
               />
               <Label htmlFor={level} className="text-sm text-white/90">
                 {level}
