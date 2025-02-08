@@ -56,7 +56,7 @@ export const CompanyCard = ({
   const [showErrorForm, setShowErrorForm] = useState(false);
 
   const getCertificationColor = (level: string | null) => {
-    if (!level) return 'bg-destructive text-destructive-foreground';
+    if (!level) return 'bg-red-500 text-white';
     
     switch (level.toLowerCase()) {
       case 'gold':
@@ -104,8 +104,8 @@ export const CompanyCard = ({
             {certificationLevel}
           </Badge>
         ) : (
-          <Badge variant="destructive" className="font-medium">
-            ⚠️ Non-EcoVadis
+          <Badge variant="destructive" className="font-medium bg-red-500">
+            ⚠️ Certification Not Found
           </Badge>
         )}
       </CardHeader>
@@ -169,9 +169,15 @@ export const CompanyCard = ({
                       <h4 className="font-semibold text-sm text-gray-900">Certification Information</h4>
                       <div className="grid gap-2 text-sm">
                         <div className="flex items-center gap-2">
-                          <Badge className={getCertificationColor(certificationLevel)}>
-                            {certificationLevel}
-                          </Badge>
+                          {isEcoVadisCertified ? (
+                            <Badge className={getCertificationColor(certificationLevel)}>
+                              {certificationLevel}
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive" className="bg-red-500">
+                              ⚠️ Certification Not Found
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-500" />
@@ -193,63 +199,63 @@ export const CompanyCard = ({
                     <Separator />
 
                     {/* Company Details Section */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700">Industry</h4>
-                    <p className="text-sm">{industry}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700">Location</h4>
-                    <p className="text-sm">{country}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700">Size</h4>
-                    <p className="text-sm">{employeeCount} employees</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700">Annual Revenue</h4>
-                    <p className="text-sm">{annualRevenue}</p>
-                  </div>
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700">Industry</h4>
+                        <p className="text-sm">{industry}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700">Location</h4>
+                        <p className="text-sm">{country}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700">Size</h4>
+                        <p className="text-sm">{employeeCount} employees</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700">Annual Revenue</h4>
+                        <p className="text-sm">{annualRevenue}</p>
+                      </div>
+                    </div>
 
                     {/* Links Section */}
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm text-gray-700">Links</h4>
-                  <div className="space-y-2">
-                    <a
-                      href={website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
-                    >
-                      <Globe className="h-4 w-4" />
-                      Website
-                    </a>
-                    {linkedin && (
-                      <a
-                        href={linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
-                      >
-                        <Linkedin className="h-4 w-4" />
-                        LinkedIn
-                      </a>
-                    )}
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm text-gray-700">Links</h4>
+                      <div className="space-y-2">
+                        <a
+                          href={website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
+                        >
+                          <Globe className="h-4 w-4" />
+                          Website
+                        </a>
+                        {linkedin && (
+                          <a
+                            href={linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-primary hover:text-primary-hover text-sm"
+                          >
+                            <Linkedin className="h-4 w-4" />
+                            LinkedIn
+                          </a>
+                        )}
+                      </div>
+                    </div>
 
                     {/* Keywords Section */}
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {keywords?.split(',').map((keyword, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {keyword.trim()}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords?.split(',').map((keyword, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {keyword.trim()}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Report Error Button */}
                     <Button

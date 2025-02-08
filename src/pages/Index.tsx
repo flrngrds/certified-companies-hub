@@ -8,6 +8,7 @@ import { LatestCompanies } from "@/components/LatestCompanies";
 import { CompaniesList } from "@/components/CompaniesList";
 import { useLatestCompanies, useAllCompanies } from "@/hooks/use-companies";
 import { useToast } from "@/components/ui/use-toast";
+import { Disclaimer } from "@/components/Disclaimer";
 
 const COMPANIES_PER_PAGE = 9;
 
@@ -89,6 +90,7 @@ const Index = () => {
         <Header onToggleFilters={() => setShowFilters(!showFilters)} />
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
+            {!isEcoVadisCertified && <Disclaimer />}
             {isLoadingLatest ? (
               <div>Loading latest companies...</div>
             ) : (
