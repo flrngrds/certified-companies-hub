@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Filters } from "@/components/Filters";
@@ -14,6 +15,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isEcoVadisCertified, setIsEcoVadisCertified] = useState(true);
   const { toast } = useToast();
   
   const [filters, setFilters] = useState({
@@ -24,10 +26,11 @@ const Index = () => {
     searchTerm: "",
   });
 
-  const { data: latestCompanies, isLoading: isLoadingLatest, error: latestError } = useLatestCompanies();
+  const { data: latestCompanies, isLoading: isLoadingLatest, error: latestError } = useLatestCompanies(isEcoVadisCertified);
   const { data: allCompaniesData, isLoading: isLoadingAll, error: allError } = useAllCompanies(
     currentPage,
     COMPANIES_PER_PAGE,
+    isEcoVadisCertified,
     filters
   );
 
@@ -59,6 +62,11 @@ const Index = () => {
     setCurrentPage(0);
   };
 
+  const handleCertificationTypeChange = (certified: boolean) => {
+    setIsEcoVadisCertified(certified);
+    handleResetFilters();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <aside 
@@ -71,6 +79,8 @@ const Index = () => {
           <Filters 
             onFilterChange={handleFilterUpdate} 
             onResetFilters={handleResetFilters}
+            onCertificationTypeChange={handleCertificationTypeChange}
+            isEcoVadisCertified={isEcoVadisCertified}
           />
         </div>
       </aside>

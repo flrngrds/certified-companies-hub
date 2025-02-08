@@ -29,9 +29,16 @@ interface FiltersProps {
     certLevel?: string;
   }) => void;
   onResetFilters: () => void;
+  onCertificationTypeChange: (isEcoVadisCertified: boolean) => void;
+  isEcoVadisCertified: boolean;
 }
 
-export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
+export const Filters = ({ 
+  onFilterChange, 
+  onResetFilters, 
+  onCertificationTypeChange,
+  isEcoVadisCertified 
+}: FiltersProps) => {
   const [filters, setFilters] = useState({
     industry: "",
     country: "",
@@ -62,10 +69,8 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
       const newFilters = { ...filters };
       
       if (["bronze", "silver", "gold", "platinum"].includes(value.toLowerCase())) {
-        // When selecting from radio buttons, update both certLevel and ensure "certified" is selected in dropdown
         newFilters.certLevel = value.toLowerCase();
       } else {
-        // When selecting from dropdown, clear radio selection if "non-certified" is chosen
         newFilters.certLevel = value === "non-certified" ? "non-certified" : value;
       }
       
@@ -101,20 +106,15 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
     onResetFilters();
   };
 
-  // Helper function to determine if a certification level radio should be selected
-  const isCertLevelSelected = (level: string) => {
-    return filters.certLevel === level.toLowerCase() && filters.certLevel !== "non-certified";
-  };
-
   return (
     <div className="w-full space-y-6">
       <div className="space-y-4">
         <Select 
-          value={filters.certLevel === "non-certified" ? "non-certified" : "certified"} 
-          onValueChange={(value) => handleFilterChange("certLevel", value)}
+          value={isEcoVadisCertified ? "certified" : "non-certified"}
+          onValueChange={(value) => onCertificationTypeChange(value === "certified")}
         >
           <SelectTrigger className="w-full bg-white text-gray-900 border-white/20">
-            <SelectValue placeholder="EcoVadis-certified" />
+            <SelectValue placeholder="Company Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
             <SelectItem value="certified">EcoVadis-certified</SelectItem>
@@ -123,28 +123,29 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
         </Select>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="font-medium text-white">Certification Level</h3>
-        <RadioGroup 
-          value={filters.certLevel} 
-          onValueChange={(value) => handleFilterChange("certLevel", value)} 
-          className="space-y-2"
-        >
-          {["Platinum", "Gold", "Silver", "Bronze"].map((level) => (
-            <div key={level} className="flex items-center space-x-2">
-              <RadioGroupItem 
-                value={level.toLowerCase()} 
-                id={level} 
-                className="border-white/50 text-white"
-                disabled={filters.certLevel === "non-certified"}
-              />
-              <Label htmlFor={level} className="text-sm text-white/90">
-                {level}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
+      {isEcoVadisCertified && (
+        <div className="space-y-4">
+          <h3 className="font-medium text-white">Certification Level</h3>
+          <RadioGroup 
+            value={filters.certLevel} 
+            onValueChange={(value) => handleFilterChange("certLevel", value)} 
+            className="space-y-2"
+          >
+            {["Platinum", "Gold", "Silver", "Bronze"].map((level) => (
+              <div key={level} className="flex items-center space-x-2">
+                <RadioGroupItem 
+                  value={level.toLowerCase()} 
+                  id={level} 
+                  className="border-white/50 text-white"
+                />
+                <Label htmlFor={level} className="text-sm text-white/90">
+                  {level}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+      )}
 
       <div className="space-y-4">
         <h3 className="font-medium text-white">Country</h3>

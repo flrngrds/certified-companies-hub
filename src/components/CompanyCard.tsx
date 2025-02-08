@@ -16,7 +16,7 @@ import { useState } from "react";
 interface CompanyCardProps {
   name: string;
   website: string;
-  certificationLevel: string;
+  certificationLevel?: string;
   employeeCount: string;
   industry: string;
   country: string;
@@ -30,6 +30,7 @@ interface CompanyCardProps {
   linkedin?: string;
   annualRevenue?: string;
   showAllDetails?: boolean;
+  isEcoVadisCertified?: boolean;
 }
 
 export const CompanyCard = ({
@@ -49,6 +50,7 @@ export const CompanyCard = ({
   linkedin,
   annualRevenue,
   showAllDetails = false,
+  isEcoVadisCertified = true,
 }: CompanyCardProps) => {
   const [showErrorForm, setShowErrorForm] = useState(false);
 
@@ -91,12 +93,18 @@ export const CompanyCard = ({
             )}
           </div>
         </div>
-        <Badge
-          variant="secondary"
-          className={`font-medium border ${getCertificationColor(certificationLevel)}`}
-        >
-          {certificationLevel}
-        </Badge>
+        {isEcoVadisCertified ? (
+          <Badge
+            variant="secondary"
+            className={`font-medium border ${getCertificationColor(certificationLevel || '')}`}
+          >
+            {certificationLevel}
+          </Badge>
+        ) : (
+          <Badge variant="destructive" className="font-medium">
+            ⚠️ Non-EcoVadis
+          </Badge>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center text-gray-700">

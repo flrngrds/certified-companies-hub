@@ -1,10 +1,11 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Company {
   name: string;
   website: string;
-  certificationLevel: string;
+  certificationLevel?: string;
   employeeCount: string;
   industry: string;
   country: string;
@@ -17,9 +18,10 @@ export interface Company {
   keywords?: string;
   linkedin?: string;
   annualRevenue?: string;
+  isEcoVadisCertified?: boolean;
 }
 
-const transformCompanyData = (data: any): Company => ({
+const transformCertifiedCompanyData = (data: any): Company => ({
   name: data.Entreprise || 'Unknown Company',
   website: data.Website || '#',
   certificationLevel: data.Niveau || 'Not Specified',
@@ -36,16 +38,36 @@ const transformCompanyData = (data: any): Company => ({
   lastVerified: data["Last verified"] || 'Not Specified',
   keywords: data.Keywords || 'No keywords available',
   linkedin: data.LinkedIn || '#',
-  annualRevenue: data["Annual Revenue"] || 'Not Specified'
+  annualRevenue: data["Annual Revenue"] || 'Not Specified',
+  isEcoVadisCertified: true
 });
 
-export const useLatestCompanies = () => {
+const transformNonCertifiedCompanyData = (data: any): Company => ({
+  name: data.Entreprise || 'Unknown Company',
+  website: data.Website || '#',
+  employeeCount: data.Employees?.toString() || 'Not Specified',
+  industry: data.Industry || 'Not Specified',
+  country: data.Country || 'Not Specified',
+  isNew: data["Date de création"] ? 
+    new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
+    false,
+  logo: data.image || '/placeholder.svg',
+  description: 'No description available.',
+  publicationDate: data["Publication source"] || 'Not Specified',
+  sourceLink: data.Lien || '#',
+  lastVerified: data["Last verified"] || 'Not Specified',
+  keywords: data.Keywords || 'No keywords available',
+  annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
+  isEcoVadisCertified: false
+});
+
+export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
   return useQuery({
-    queryKey: ["latestCompanies"],
+    queryKey: ["latestCompanies", isEcoVadisCertified],
     queryFn: async () => {
-      console.log("Fetching latest companies...");
+      console.log(`Fetching latest ${isEcoVadisCertified ? 'certified' : 'non-certified'} companies...`);
       const { data, error } = await supabase
-        .from("EcoVadis-certified")
+        .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*")
         .order("Date de création", { ascending: false })
         .limit(3);
@@ -56,7 +78,7 @@ export const useLatestCompanies = () => {
       }
 
       console.log("Latest companies data:", data);
-      return data ? data.map(transformCompanyData) : [];
+      return data ? data.map(isEcoVadisCertified ? transformCertifiedCompanyData : transformNonCertifiedCompanyData) : [];
     },
   });
 };
@@ -64,6 +86,7 @@ export const useLatestCompanies = () => {
 export const useAllCompanies = (
   page: number, 
   limit: number,
+  isEcoVadisCertified: boolean = true,
   filters?: {
     industry?: string;
     country?: string;
@@ -73,11 +96,11 @@ export const useAllCompanies = (
   }
 ) => {
   return useQuery({
-    queryKey: ["allCompanies", page, limit, filters],
+    queryKey: ["allCompanies", page, limit, isEcoVadisCertified, filters],
     queryFn: async () => {
       console.log("Fetching all companies with filters:", filters);
       let query = supabase
-        .from("EcoVadis-certified")
+        .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*", { count: "exact" });
 
       // Apply filters
@@ -87,7 +110,7 @@ export const useAllCompanies = (
       if (filters?.country) {
         query = query.ilike('Country', `%${filters.country}%`);
       }
-      if (filters?.certLevel) {
+      if (isEcoVadisCertified && filters?.certLevel) {
         query = query.ilike('Niveau', `%${filters.certLevel}%`);
       }
       if (filters?.companySize) {
@@ -119,7 +142,7 @@ export const useAllCompanies = (
 
       console.log("All companies data:", data);
       return {
-        companies: data ? data.map(transformCompanyData) : [],
+        companies: data ? data.map(isEcoVadisCertified ? transformCertifiedCompanyData : transformNonCertifiedCompanyData) : [],
         total: count || 0,
       };
     },
