@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
@@ -98,7 +99,7 @@ export const SubscriptionManager = () => {
           <h3 className="text-xl font-semibold mb-2">Basic Plan</h3>
           <p className="text-4xl font-bold mb-1">$299<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">No commitment</p>
-          {getPlanButton('Basic', 'price_1Q6yj0G4TGR1Qn6rC3c2NQ8q')}
+          {getPlanButton('Basic', 'price_1QGMpIG4TGR1Qn6rUc16QbuT')}
           <h4 className="font-semibold mb-4 mt-6">Features</h4>
           <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
@@ -131,7 +132,7 @@ export const SubscriptionManager = () => {
           <h3 className="text-xl font-semibold mb-2">Premium Plan</h3>
           <p className="text-4xl font-bold mb-1">$279<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">(billed semi-annually)</p>
-          {getPlanButton('Premium', 'price_1Q6yjMG4TGR1Qn6rYVFktuZc')}
+          {getPlanButton('Premium', 'price_1QGMsMG4TGR1Qn6retfbREsl')}
           <h4 className="font-semibold mb-4 mt-6">Features</h4>
           <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">
@@ -172,7 +173,7 @@ export const SubscriptionManager = () => {
           <h3 className="text-xl font-semibold mb-2">Enterprise Plan</h3>
           <p className="text-4xl font-bold mb-1">$249<span className="text-sm font-normal">/month</span></p>
           <p className="text-sm text-gray-600 mb-4">(billed annually)</p>
-          {getPlanButton('Enterprise', 'price_1Q7FSLG4TGR1Qn6raCjcoEl7')}
+          {getPlanButton('Enterprise', 'price_1QGMsvG4TGR1Qn6rghOqEU8H')}
           <h4 className="font-semibold mb-4 mt-6">Features</h4>
           <ul className="space-y-3 text-xs">
             <li className="flex items-center gap-2">

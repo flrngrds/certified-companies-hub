@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
@@ -63,13 +64,13 @@ serve(async (req) => {
 
     let plan = 'free'
     switch (priceId) {
-      case 'price_1Q6yj0G4TGR1Qn6rC3c2NQ8q':
+      case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
         plan = 'Basic'
         break
-      case 'price_1Q6yjMG4TGR1Qn6rYVFktuZc':
+      case 'price_1QGMsMG4TGR1Qn6retfbREsl':
         plan = 'Premium'
         break
-      case 'price_1Q7FSLG4TGR1Qn6raCjcoEl7':
+      case 'price_1QGMsvG4TGR1Qn6rghOqEU8H':
         plan = 'Enterprise'
         break
     }
