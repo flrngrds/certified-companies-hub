@@ -1,3 +1,4 @@
+
 import { Building2, Globe, Users, MapPin, Calendar, Link2, Clock, Tag, Linkedin, AlertOctagon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -16,7 +17,7 @@ import { useState } from "react";
 interface CompanyCardProps {
   name: string;
   website: string;
-  certificationLevel?: string;
+  certificationLevel: string | null;
   employeeCount: string;
   industry: string;
   country: string;
@@ -54,7 +55,9 @@ export const CompanyCard = ({
 }: CompanyCardProps) => {
   const [showErrorForm, setShowErrorForm] = useState(false);
 
-  const getCertificationColor = (level: string) => {
+  const getCertificationColor = (level: string | null) => {
+    if (!level) return 'bg-destructive text-destructive-foreground';
+    
     switch (level.toLowerCase()) {
       case 'gold':
         return 'bg-[#FFD700] text-black';

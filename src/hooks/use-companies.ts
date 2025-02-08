@@ -1,11 +1,10 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Company {
   name: string;
   website: string;
-  certificationLevel?: string;
+  certificationLevel: string | null;
   employeeCount: string;
   industry: string;
   country: string;
@@ -24,7 +23,7 @@ export interface Company {
 const transformCertifiedCompanyData = (data: any): Company => ({
   name: data.Entreprise || 'Unknown Company',
   website: data.Website || '#',
-  certificationLevel: data.Niveau || 'Not Specified',
+  certificationLevel: data.Niveau || null,
   employeeCount: data.Employees?.toString() || 'Not Specified',
   industry: data.Industry || 'Not Specified',
   country: data.Country || 'Not Specified',
@@ -38,13 +37,14 @@ const transformCertifiedCompanyData = (data: any): Company => ({
   lastVerified: data["Last verified"] || 'Not Specified',
   keywords: data.Keywords || 'No keywords available',
   linkedin: data.LinkedIn || '#',
-  annualRevenue: data["Annual Revenue"] || 'Not Specified',
+  annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
   isEcoVadisCertified: true
 });
 
 const transformNonCertifiedCompanyData = (data: any): Company => ({
   name: data.Entreprise || 'Unknown Company',
   website: data.Website || '#',
+  certificationLevel: null,
   employeeCount: data.Employees?.toString() || 'Not Specified',
   industry: data.Industry || 'Not Specified',
   country: data.Country || 'Not Specified',
