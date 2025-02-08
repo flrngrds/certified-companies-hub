@@ -102,6 +102,28 @@ export const Filters = ({ onFilterChange, onResetFilters }: FiltersProps) => {
       </div>
 
       <div className="space-y-4">
+        <h3 className="font-medium text-white">Certification Level</h3>
+        <RadioGroup 
+          value={filters.certLevel} 
+          onValueChange={(value) => handleFilterChange("certLevel", value)} 
+          className="space-y-2"
+        >
+          {["Platinum", "Gold", "Silver", "Bronze"].map((level) => (
+            <div key={level} className="flex items-center space-x-2">
+              <RadioGroupItem 
+                value={level.toLowerCase()} 
+                id={level} 
+                className="border-white/50 text-white" 
+              />
+              <Label htmlFor={level} className="text-sm text-white/90">
+                {level}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+
+      <div className="space-y-4">
         <h3 className="font-medium text-white">Country</h3>
         <RadioGroup 
           value={filters.country} 

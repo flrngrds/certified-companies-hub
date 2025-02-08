@@ -93,6 +93,78 @@ export type Database = {
         }
         Relationships: []
       }
+      "Non-EcoVadis-certified": {
+        Row: {
+          "# Employees": number | null
+          "Annual Revenue": number | null
+          Calcul: string | null
+          Certifiée: string | null
+          City: string | null
+          Company: string
+          "Company Location": string | null
+          Country: string | null
+          "Date de création": string | null
+          "Date de modification": string | null
+          Founded: number | null
+          image: string | null
+          Industry: string | null
+          Keywords: string | null
+          "Last verified": string | null
+          Lien: string | null
+          Logo: string | null
+          Niveau: string | null
+          "Publication source": string | null
+          Street: string | null
+          Website: string | null
+        }
+        Insert: {
+          "# Employees"?: number | null
+          "Annual Revenue"?: number | null
+          Calcul?: string | null
+          Certifiée?: string | null
+          City?: string | null
+          Company: string
+          "Company Location"?: string | null
+          Country?: string | null
+          "Date de création"?: string | null
+          "Date de modification"?: string | null
+          Founded?: number | null
+          image?: string | null
+          Industry?: string | null
+          Keywords?: string | null
+          "Last verified"?: string | null
+          Lien?: string | null
+          Logo?: string | null
+          Niveau?: string | null
+          "Publication source"?: string | null
+          Street?: string | null
+          Website?: string | null
+        }
+        Update: {
+          "# Employees"?: number | null
+          "Annual Revenue"?: number | null
+          Calcul?: string | null
+          Certifiée?: string | null
+          City?: string | null
+          Company?: string
+          "Company Location"?: string | null
+          Country?: string | null
+          "Date de création"?: string | null
+          "Date de modification"?: string | null
+          Founded?: number | null
+          image?: string | null
+          Industry?: string | null
+          Keywords?: string | null
+          "Last verified"?: string | null
+          Lien?: string | null
+          Logo?: string | null
+          Niveau?: string | null
+          "Publication source"?: string | null
+          Street?: string | null
+          Website?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
