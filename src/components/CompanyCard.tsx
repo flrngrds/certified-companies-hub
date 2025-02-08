@@ -1,4 +1,3 @@
-
 import { Building2, Globe, Users, MapPin, Calendar, Link2, Clock, Tag, Linkedin, AlertOctagon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -104,8 +103,8 @@ export const CompanyCard = ({
             {certificationLevel}
           </Badge>
         ) : (
-          <Badge variant="destructive" className="font-medium bg-red-500">
-            ⚠️ Certification Not Found
+          <Badge variant="destructive" className="font-medium bg-[#FFDEE2] text-white">
+            ⚠️ Not Found
           </Badge>
         )}
       </CardHeader>
@@ -174,7 +173,7 @@ export const CompanyCard = ({
                               {certificationLevel}
                             </Badge>
                           ) : (
-                            <Badge variant="destructive" className="bg-red-500">
+                            <Badge variant="destructive" className="bg-[#FFDEE2] text-white">
                               ⚠️ Certification Not Found
                             </Badge>
                           )}
