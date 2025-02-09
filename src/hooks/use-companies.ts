@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -42,7 +43,7 @@ const transformCertifiedCompanyData = (data: any): Company => ({
 });
 
 const transformNonCertifiedCompanyData = (data: any): Company => ({
-  name: data.Entreprise || 'Unknown Company',
+  name: data.Company || 'Unknown Company', // Changed from Entreprise to Company
   website: data.Website || '#',
   certificationLevel: null,
   employeeCount: data.Employees?.toString() || 'Not Specified',
@@ -69,7 +70,7 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       const { data, error } = await supabase
         .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*")
-        .order("Date de création", { ascending: false })
+        .order(isEcoVadisCertified ? "Date de création" : "Date de création", { ascending: false })
         .limit(3);
 
       if (error) {
@@ -124,7 +125,7 @@ export const useAllCompanies = (
         }
       }
       if (filters?.searchTerm) {
-        query = query.ilike('Entreprise', `%${filters.searchTerm}%`);
+        query = query.ilike(isEcoVadisCertified ? 'Entreprise' : 'Company', `%${filters.searchTerm}%`);
       }
 
       // Add pagination
@@ -132,7 +133,7 @@ export const useAllCompanies = (
       const to = from + limit - 1;
       
       const { data, error, count } = await query
-        .order('Entreprise')
+        .order(isEcoVadisCertified ? 'Entreprise' : 'Company')
         .range(from, to);
 
       if (error) {

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Filters } from "@/components/Filters";
 import { SearchFilters } from "@/components/SearchFilters";
@@ -35,13 +35,16 @@ const Index = () => {
     filters
   );
 
-  if (latestError || allError) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to load companies data. Please try again later.",
-    });
-  }
+  // Handle errors using useEffect instead of during render
+  useEffect(() => {
+    if (latestError || allError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load companies data. Please try again later.",
+      });
+    }
+  }, [latestError, allError, toast]);
 
   const handleFilterUpdate = (newFilters: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
@@ -116,3 +119,4 @@ const Index = () => {
 };
 
 export default Index;
+
