@@ -95,15 +95,17 @@ export type Database = {
       }
       "Non-EcoVadis-certified": {
         Row: {
+          "# Employees": string | null
           "Annual Revenue": number | null
           Calcul: string | null
           Certifiée: string | null
           City: string | null
+          Company: string
+          "Company Location": string | null
           Country: string | null
           "Date de création": string | null
           "Date de modification": string | null
           Employees: number | null
-          Entreprise: string
           Founded: number | null
           image: string | null
           Industry: string | null
@@ -118,15 +120,17 @@ export type Database = {
           Website: string | null
         }
         Insert: {
+          "# Employees"?: string | null
           "Annual Revenue"?: number | null
           Calcul?: string | null
           Certifiée?: string | null
           City?: string | null
+          Company: string
+          "Company Location"?: string | null
           Country?: string | null
           "Date de création"?: string | null
           "Date de modification"?: string | null
           Employees?: number | null
-          Entreprise: string
           Founded?: number | null
           image?: string | null
           Industry?: string | null
@@ -141,15 +145,17 @@ export type Database = {
           Website?: string | null
         }
         Update: {
+          "# Employees"?: string | null
           "Annual Revenue"?: number | null
           Calcul?: string | null
           Certifiée?: string | null
           City?: string | null
+          Company?: string
+          "Company Location"?: string | null
           Country?: string | null
           "Date de création"?: string | null
           "Date de modification"?: string | null
           Employees?: number | null
-          Entreprise?: string
           Founded?: number | null
           image?: string | null
           Industry?: string | null
