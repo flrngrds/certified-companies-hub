@@ -31,7 +31,7 @@ const transformCertifiedCompanyData = (data: any): Company => ({
   isNew: data["Date de création"] ? 
     new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
     false,
-  logo: data.image || '/placeholder.svg',
+  logo: data.Logo || '/placeholder.svg',
   description: data.Description || 'No description available.',
   publicationDate: data["Publication source"] || 'Not Specified',
   sourceLink: data.Lien || '#',
@@ -43,7 +43,7 @@ const transformCertifiedCompanyData = (data: any): Company => ({
 });
 
 const transformNonCertifiedCompanyData = (data: any): Company => ({
-  name: data.Company || 'Unknown Company', // Changed from Entreprise to Company
+  name: data.Company || 'Unknown Company',
   website: data.Website || '#',
   certificationLevel: null,
   employeeCount: data.Employees?.toString() || 'Not Specified',
@@ -52,10 +52,8 @@ const transformNonCertifiedCompanyData = (data: any): Company => ({
   isNew: data["Date de création"] ? 
     new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
     false,
-  logo: data.image || '/placeholder.svg',
+  logo: data.Logo || '/placeholder.svg', // Updated to use Logo field
   description: 'No description available.',
-  publicationDate: data["Publication source"] || 'Not Specified',
-  sourceLink: data.Lien || '#',
   lastVerified: data["Last verified"] || 'Not Specified',
   keywords: data.Keywords || 'No keywords available',
   annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',

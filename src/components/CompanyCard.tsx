@@ -177,16 +177,20 @@ export const CompanyCard = ({
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-500" />
-                          <span>Published: {publicationDate}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Link2 className="h-4 w-4 text-gray-500" />
-                          <a href={sourceLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
-                            Source Link
-                          </a>
-                        </div>
+                        {isEcoVadisCertified && (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-gray-500" />
+                              <span>Published: {publicationDate}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Link2 className="h-4 w-4 text-gray-500" />
+                              <a href={sourceLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
+                                Source Link
+                              </a>
+                            </div>
+                          </>
+                        )}
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-gray-500" />
                           <span>Last Verified: {lastVerified}</span>
