@@ -10,7 +10,7 @@ export const useSubscription = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          setCurrentPlan("free");
+          setCurrentPlan("Free");
           return;
         }
 
@@ -34,13 +34,13 @@ export const useSubscription = () => {
             'price_1QGMsMG4TGR1Qn6retfbREsl': 'Premium',
             'price_1QGMsvG4TGR1Qn6rghOqEU8H': 'Enterprise'
           };
-          setCurrentPlan(planMap[customerData.price_id] || 'free');
+          setCurrentPlan(planMap[customerData.price_id] || 'Free');
         } else {
-          setCurrentPlan('free');
+          setCurrentPlan('Free');
         }
       } catch (error) {
         console.error('Error checking subscription:', error);
-        setCurrentPlan("free");
+        setCurrentPlan("Free");
       }
     };
 

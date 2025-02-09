@@ -31,7 +31,7 @@ const transformCertifiedCompanyData = (data: any): Company => ({
   isNew: data["Date de création"] ? 
     new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
     false,
-  logo: data.Logo || '/placeholder.svg',
+  logo: data.image || '/placeholder.svg',
   description: data.Description || 'No description available.',
   publicationDate: data["Publication source"] || 'Not Specified',
   sourceLink: data.Lien || '#',
