@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
   const [source, setSource] = useState("");
   const [certLevel, setCertLevel] = useState("");
   const [pubDate, setPubDate] = useState("");
+  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -38,6 +40,7 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
           source_url: source,
           certification_level: certLevel,
           publication_date: pubDate,
+          message: message,
           client_id: companyName, // This links to the EcoVadis-certified table
         });
 
@@ -132,6 +135,19 @@ export const ErrorReportForm = ({ companyName, onBack }: ErrorReportFormProps) =
             type="date"
             value={pubDate}
             onChange={(e) => setPubDate(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Message
+          </label>
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Please provide additional details about the error"
+            className="min-h-[100px]"
             required
           />
         </div>

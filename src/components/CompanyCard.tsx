@@ -103,7 +103,7 @@ export const CompanyCard = ({
             {certificationLevel}
           </Badge>
         ) : (
-          <Badge variant="destructive" className="font-medium bg-[#FFDEE2] text-white">
+          <Badge variant="destructive" className="font-medium bg-[#f26868] text-white">
             ⚠️ Not Found
           </Badge>
         )}
@@ -163,7 +163,6 @@ export const CompanyCard = ({
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="space-y-4">
-                    {/* Certification Information Section */}
                     <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
                       <h4 className="font-semibold text-sm text-gray-900">Certification Information</h4>
                       <div className="grid gap-2 text-sm">
@@ -173,7 +172,7 @@ export const CompanyCard = ({
                               {certificationLevel}
                             </Badge>
                           ) : (
-                            <Badge variant="destructive" className="bg-[#FFDEE2] text-white">
+                            <Badge variant="destructive" className="bg-[#f26868] text-white">
                               ⚠️ Certification Not Found
                             </Badge>
                           )}
@@ -197,7 +196,6 @@ export const CompanyCard = ({
 
                     <Separator />
 
-                    {/* Company Details Section */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700">Industry</h4>
@@ -217,7 +215,6 @@ export const CompanyCard = ({
                       </div>
                     </div>
 
-                    {/* Links Section */}
                     <div className="space-y-2">
                       <h4 className="font-semibold text-sm text-gray-700">Links</h4>
                       <div className="space-y-2">
@@ -244,7 +241,6 @@ export const CompanyCard = ({
                       </div>
                     </div>
 
-                    {/* Keywords Section */}
                     <div>
                       <h4 className="font-semibold text-sm text-gray-700 mb-2">Keywords</h4>
                       <div className="flex flex-wrap gap-2">
@@ -256,7 +252,6 @@ export const CompanyCard = ({
                       </div>
                     </div>
 
-                    {/* Report Error Button */}
                     <Button
                       onClick={() => setShowErrorForm(true)}
                       variant="outline"

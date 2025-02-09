@@ -196,6 +196,7 @@ export type Database = {
           company_name: string | null
           created_at: string
           id: number
+          message: string | null
           publication_date: string | null
           source_url: string | null
         }
@@ -205,6 +206,7 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           id?: number
+          message?: string | null
           publication_date?: string | null
           source_url?: string | null
         }
@@ -214,6 +216,7 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           id?: number
+          message?: string | null
           publication_date?: string | null
           source_url?: string | null
         }

@@ -1,13 +1,38 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { SubscriptionManager } from "@/components/profile/SubscriptionManager";
+import { ContactForm } from "@/components/profile/ContactForm";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState({ name: "", email: "" });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        setUserData({
+          name: profile ? `${profile.first_name} ${profile.last_name}`.trim() : "",
+          email: user.email || "",
+        });
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -37,6 +62,12 @@ const Profile = () => {
             >
               Subscription
             </TabsTrigger>
+            <TabsTrigger 
+              value="contact" 
+              className="flex-1 md:flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Contact Us
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
@@ -57,6 +88,17 @@ const Profile = () => {
               </CardHeader>
               <CardContent className="p-4 md:p-6">
                 <SubscriptionManager />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="contact">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle>Contact Us</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6">
+                <ContactForm name={userData.name} email={userData.email} />
               </CardContent>
             </Card>
           </TabsContent>
