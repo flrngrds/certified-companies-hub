@@ -107,6 +107,7 @@ export type Database = {
           "Date de modification": string | null
           Employees: number | null
           Founded: number | null
+          id: number
           image: string | null
           Industry: string | null
           Keywords: string | null
@@ -132,6 +133,7 @@ export type Database = {
           "Date de modification"?: string | null
           Employees?: number | null
           Founded?: number | null
+          id?: number
           image?: string | null
           Industry?: string | null
           Keywords?: string | null
@@ -157,6 +159,7 @@ export type Database = {
           "Date de modification"?: string | null
           Employees?: number | null
           Founded?: number | null
+          id?: number
           image?: string | null
           Industry?: string | null
           Keywords?: string | null
