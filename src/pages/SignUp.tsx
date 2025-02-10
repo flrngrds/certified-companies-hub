@@ -46,9 +46,9 @@ const SignUp = () => {
       if (data.user) {
         toast({
           title: "Success",
-          description: "Account created successfully. Please check your email to verify your account.",
+          description: "Account created successfully! Redirecting to dashboard...",
         });
-        navigate("/login");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast({
