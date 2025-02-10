@@ -9,10 +9,13 @@ import { CompaniesList } from "@/components/CompaniesList";
 import { useLatestCompanies, useAllCompanies } from "@/hooks/use-companies";
 import { useToast } from "@/components/ui/use-toast";
 import { Disclaimer } from "@/components/Disclaimer";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const COMPANIES_PER_PAGE = 9;
 
 const Index = () => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [currentPage, setCurrentPage] = useState(0);
@@ -26,6 +29,34 @@ const Index = () => {
     certLevel: "",
     searchTerm: "",
   });
+
+  // Check authentication status when component mounts
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to access the dashboard.",
+          variant: "destructive",
+        });
+        navigate("/login");
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/login");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
 
   const { data: latestCompanies, isLoading: isLoadingLatest, error: latestError } = useLatestCompanies(isEcoVadisCertified);
   const { data: allCompaniesData, isLoading: isLoadingAll, error: allError } = useAllCompanies(
@@ -119,4 +150,3 @@ const Index = () => {
 };
 
 export default Index;
-
