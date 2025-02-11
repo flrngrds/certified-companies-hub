@@ -47,13 +47,15 @@ export const ProfileForm = ({ initialData }: ProfileFormProps) => {
           .eq('id', user.id)
           .maybeSingle();
 
-        if (error) {
+        if (error && error.code !== 'PGRST116') {
           throw error;
         }
 
         if (profile) {
+          const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
           setFormData(prev => ({
             ...prev,
+            name: fullName || prev.name,
             company: profile.company || '',
             phone: profile.phone || '',
           }));
