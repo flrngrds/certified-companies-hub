@@ -85,7 +85,6 @@ export const ProfileForm = ({ initialData }: ProfileFormProps) => {
           id: user.id,
           company: formData.company,
           phone: formData.phone,
-          // Split name into first_name and last_name
           first_name: formData.name.split(' ')[0] || '',
           last_name: formData.name.split(' ').slice(1).join(' ') || '',
         });
