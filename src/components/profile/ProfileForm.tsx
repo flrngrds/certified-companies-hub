@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,7 +7,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-export const ProfileForm = () => {
+interface ProfileFormProps {
+  initialData?: {
+    name: string;
+    email: string;
+  };
+}
+
+export const ProfileForm = ({ initialData }: ProfileFormProps) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -26,7 +34,11 @@ export const ProfileForm = () => {
         }
 
         // Get user's email from auth
-        setFormData(prev => ({ ...prev, email: user.email || '' }));
+        setFormData(prev => ({ 
+          ...prev, 
+          email: user.email || '',
+          name: initialData?.name || ''
+        }));
 
         // Get additional profile data if it exists
         const { data: profile } = await supabase
@@ -38,8 +50,8 @@ export const ProfileForm = () => {
         if (profile) {
           setFormData(prev => ({
             ...prev,
-            name: `${profile.first_name} ${profile.last_name}`.trim(),
-            // Add other profile fields as needed
+            company: profile.company || '',
+            phone: profile.phone || '',
           }));
         }
       } catch (error) {
@@ -51,12 +63,35 @@ export const ProfileForm = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically update the user profile
-    toast.success("Profile updated successfully");
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error("User not authenticated");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          company: formData.company,
+          phone: formData.phone,
+          // Split name into first_name and last_name
+          first_name: formData.name.split(' ')[0] || '',
+          last_name: formData.name.split(' ').slice(1).join(' ') || '',
+        });
+
+      if (error) throw error;
+      toast.success("Profile updated successfully");
+    } catch (error: any) {
+      toast.error("Error updating profile");
+      console.error(error);
+    }
   };
 
   const handleSignOut = async () => {
@@ -93,7 +128,6 @@ export const ProfileForm = () => {
             id="email"
             type="email"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             disabled
           />
         </div>

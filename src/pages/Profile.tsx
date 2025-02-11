@@ -17,18 +17,21 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        setUserData({
-          name: profile ? `${profile.first_name} ${profile.last_name}`.trim() : "",
-          email: user.email || "",
-        });
+      if (!user) {
+        navigate('/login');
+        return;
       }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      setUserData({
+        name: profile ? `${profile.first_name} ${profile.last_name}`.trim() : "",
+        email: user.email || "",
+      });
     };
 
     fetchUserData();
@@ -49,55 +52,55 @@ const Profile = () => {
         </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="w-full md:w-auto flex space-x-2 bg-primary/10 p-1 rounded-lg">
+          <TabsList className="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 bg-transparent p-0">
             <TabsTrigger 
               value="profile" 
-              className="flex-1 md:flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+              className="w-full md:w-auto data-[state=active]:bg-primary data-[state=active]:text-white bg-white"
             >
               Profile Information
             </TabsTrigger>
             <TabsTrigger 
               value="subscription" 
-              className="flex-1 md:flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+              className="w-full md:w-auto data-[state=active]:bg-primary data-[state=active]:text-white bg-white"
             >
               Subscription
             </TabsTrigger>
             <TabsTrigger 
               value="contact" 
-              className="flex-1 md:flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+              className="w-full md:w-auto data-[state=active]:bg-primary data-[state=active]:text-white bg-white"
             >
               Contact Us
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <Card className="bg-white">
+            <Card>
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 md:p-6">
-                <ProfileForm />
+              <CardContent>
+                <ProfileForm initialData={userData} />
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="subscription">
-            <Card className="bg-white">
+            <Card>
               <CardHeader>
                 <CardTitle>Subscription Management</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 md:p-6">
+              <CardContent>
                 <SubscriptionManager />
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="contact">
-            <Card className="bg-white">
+            <Card>
               <CardHeader>
                 <CardTitle>Contact Us</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 md:p-6">
+              <CardContent>
                 <ContactForm name={userData.name} email={userData.email} />
               </CardContent>
             </Card>

@@ -39,7 +39,7 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return null; // or a loading spinner
+    return <div>Loading...</div>; // Add a proper loading spinner here
   }
 
   return (
@@ -49,18 +49,33 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={session ? <Navigate to="/dashboard" /> : <Login />} />
-            <Route path="/signup" element={session ? <Navigate to="/dashboard" /> : <SignUp />} />
+            {/* Public routes - accessible whether logged in or not */}
+            <Route 
+              path="/login" 
+              element={session ? <Navigate to="/dashboard" /> : <Login />} 
+            />
+            <Route 
+              path="/signup" 
+              element={session ? <Navigate to="/dashboard" /> : <SignUp />} 
+            />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            {/* Protected routes */}
-            <Route path="/dashboard" element={session ? <Index /> : <Navigate to="/login" />} />
-            <Route path="/profile" element={session ? <Profile /> : <Navigate to="/login" />} />
+            {/* Protected routes - must be logged in */}
+            <Route 
+              path="/dashboard" 
+              element={session ? <Index /> : <Navigate to="/login" state={{ from: "/dashboard" }} />} 
+            />
+            <Route 
+              path="/profile" 
+              element={session ? <Profile /> : <Navigate to="/login" state={{ from: "/profile" }} />} 
+            />
             
             {/* Root redirect */}
-            <Route path="/" element={<Navigate to={session ? "/dashboard" : "/login"} />} />
+            <Route 
+              path="/" 
+              element={<Navigate to={session ? "/dashboard" : "/login"} />} 
+            />
             
             {/* 404 route */}
             <Route path="*" element={<NotFound />} />
