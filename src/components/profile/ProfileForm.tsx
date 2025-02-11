@@ -41,11 +41,15 @@ export const ProfileForm = ({ initialData }: ProfileFormProps) => {
         }));
 
         // Get additional profile data if it exists
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+
+        if (error) {
+          throw error;
+        }
 
         if (profile) {
           setFormData(prev => ({
