@@ -11,6 +11,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Disclaimer } from "@/components/Disclaimer";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const COMPANIES_PER_PAGE = 9;
 
@@ -104,10 +106,31 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Overlay when sidebar is shown on mobile */}
+      {showFilters && isMobile && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30"
+          onClick={() => setShowFilters(false)}
+        />
+      )}
+      
+      {/* Mobile Toggle Button - Fixed position */}
+      {isMobile && (
+        <Button
+          variant="secondary"
+          size="icon"
+          className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg bg-primary hover:bg-primary/90"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <Menu className="h-6 w-6 text-white" />
+        </Button>
+      )}
+
+      {/* Sidebar */}
       <aside 
-        className={`fixed left-0 top-0 z-30 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out ${
-          showFilters ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        className={`fixed left-0 top-0 z-40 h-screen bg-[#006A60] text-white w-64 transition-transform duration-300 ease-in-out ${
+          showFilters ? "translate-x-0" : "-translate-x-full"
+        } ${!isMobile ? "translate-x-0" : ""}`}
       >
         <div className="p-4 overflow-y-auto h-full">
           <h1 className="text-2xl font-bold text-white mb-8">VadiBase</h1>
@@ -120,7 +143,8 @@ const Index = () => {
         </div>
       </aside>
 
-      <div className={`${isMobile ? "w-full" : "pl-64"}`}>
+      {/* Main Content */}
+      <div className={`${!isMobile ? "pl-64" : ""} w-full`}>
         <Header onToggleFilters={() => setShowFilters(!showFilters)} />
         <main className="w-full px-4 py-8">
           <div className="max-w-7xl mx-auto space-y-8">
