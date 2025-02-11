@@ -109,7 +109,7 @@ const Index = () => {
           showFilters ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="p-4">
+        <div className="p-4 overflow-y-auto h-full">
           <h1 className="text-2xl font-bold text-white mb-8">VadiBase</h1>
           <Filters 
             onFilterChange={handleFilterUpdate} 
@@ -120,7 +120,7 @@ const Index = () => {
         </div>
       </aside>
 
-      <div className="flex-1 md:ml-64">
+      <div className={`flex-1 ${isMobile ? "" : "md:ml-64"}`}>
         <Header onToggleFilters={() => setShowFilters(!showFilters)} />
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
