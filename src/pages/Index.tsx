@@ -103,9 +103,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       <aside 
-        className={`fixed left-0 top-0 z-30 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out overflow-y-auto ${
+        className={`fixed left-0 top-0 z-30 h-screen bg-[#006A60] text-white w-64 flex-shrink-0 transition-all duration-200 ease-in-out ${
           showFilters ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -120,10 +120,10 @@ const Index = () => {
         </div>
       </aside>
 
-      <div className={`flex-1 ${isMobile ? "" : "md:ml-64"}`}>
+      <div className={`${isMobile ? "w-full" : "pl-64"}`}>
         <Header onToggleFilters={() => setShowFilters(!showFilters)} />
-        <main className="container mx-auto px-4 py-8">
-          <div className="space-y-8">
+        <main className="w-full px-4 py-8">
+          <div className="max-w-7xl mx-auto space-y-8">
             {!isEcoVadisCertified && <Disclaimer />}
             {isLoadingLatest ? (
               <div>Loading latest companies...</div>
