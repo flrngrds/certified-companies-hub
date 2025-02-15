@@ -21,44 +21,56 @@ export interface Company {
   isEcoVadisCertified?: boolean;
 }
 
-const transformCertifiedCompanyData = (data: any): Company => ({
-  name: data.Entreprise || 'Unknown Company',
-  website: data.Website || '#',
-  certificationLevel: data.Niveau || null,
-  employeeCount: data.Employees?.toString() || 'Not Specified',
-  industry: data.Industry || 'Not Specified',
-  country: data.Country || 'Not Specified',
-  isNew: data["Date de création"] ? 
-    new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
-    false,
-  logo: data.image || '/placeholder.svg',
-  description: data.Description || 'No description available.',
-  publicationDate: data["Publication source"] || 'Not Specified',
-  sourceLink: data.Lien || '#',
-  lastVerified: data["Last verified"] || 'Not Specified',
-  keywords: data.Keywords || 'No keywords available',
-  linkedin: data.LinkedIn || '#',
-  annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
-  isEcoVadisCertified: true
-});
+const transformCertifiedCompanyData = (data: any): Company => {
+  // Parse the creation date string into a Date object
+  const creationDate = data["Date de création"] ? new Date(data["Date de création"].replace(/pm|am/i, '').trim()) : null;
+  const isNew = creationDate ? 
+    (new Date().getTime() - creationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies added in last 30 days as new
+    false;
 
-const transformNonCertifiedCompanyData = (data: any): Company => ({
-  name: data.Company || 'Unknown Company',
-  website: data.Website || '#',
-  certificationLevel: null,
-  employeeCount: data.Employees?.toString() || 'Not Specified',
-  industry: data.Industry || 'Not Specified',
-  country: data.Country || 'Not Specified',
-  isNew: data["Date de création"] ? 
-    new Date(data["Date de création"]) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : 
-    false,
-  logo: data.Logo || '/placeholder.svg', // Updated to use Logo field
-  description: 'No description available.',
-  lastVerified: data["Last verified"] || 'Not Specified',
-  keywords: data.Keywords || 'No keywords available',
-  annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
-  isEcoVadisCertified: false
-});
+  return {
+    name: data.Entreprise || 'Unknown Company',
+    website: data.Website || '#',
+    certificationLevel: data.Niveau || null,
+    employeeCount: data.Employees?.toString() || 'Not Specified',
+    industry: data.Industry || 'Not Specified',
+    country: data.Country || 'Not Specified',
+    isNew,
+    logo: data.image || '/placeholder.svg',
+    description: data.Description || 'No description available.',
+    publicationDate: data["Publication source"] || 'Not Specified',
+    sourceLink: data.Lien || '#',
+    lastVerified: data["Last verified"] || 'Not Specified',
+    keywords: data.Keywords || 'No keywords available',
+    linkedin: data.LinkedIn || '#',
+    annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
+    isEcoVadisCertified: true
+  };
+};
+
+const transformNonCertifiedCompanyData = (data: any): Company => {
+  // Parse the creation date string into a Date object
+  const creationDate = data["Date de création"] ? new Date(data["Date de création"].replace(/pm|am/i, '').trim()) : null;
+  const isNew = creationDate ? 
+    (new Date().getTime() - creationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies added in last 30 days as new
+    false;
+
+  return {
+    name: data.Company || 'Unknown Company',
+    website: data.Website || '#',
+    certificationLevel: null,
+    employeeCount: data.Employees?.toString() || 'Not Specified',
+    industry: data.Industry || 'Not Specified',
+    country: data.Country || 'Not Specified',
+    isNew,
+    logo: data.Logo || '/placeholder.svg',
+    description: 'No description available.',
+    lastVerified: data["Last verified"] || 'Not Specified',
+    keywords: data.Keywords || 'No keywords available',
+    annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
+    isEcoVadisCertified: false
+  };
+};
 
 export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
   return useQuery({
@@ -68,7 +80,7 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       const { data, error } = await supabase
         .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*")
-        .order(isEcoVadisCertified ? "Date de création" : "Date de création", { ascending: false })
+        .order("Date de création", { ascending: false })
         .limit(3);
 
       if (error) {
