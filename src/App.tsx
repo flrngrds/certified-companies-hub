@@ -39,17 +39,17 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Add a proper loading spinner here
+    return <div>Loading...</div>;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/">
+          <Toaster />
+          <Sonner />
           <Routes>
-            {/* Public routes - accessible whether logged in or not */}
+            {/* Public routes */}
             <Route 
               path="/login" 
               element={session ? <Navigate to="/dashboard" /> : <Login />} 
@@ -61,7 +61,7 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            {/* Protected routes - must be logged in */}
+            {/* Protected routes */}
             <Route 
               path="/dashboard" 
               element={session ? <Index /> : <Navigate to="/login" state={{ from: "/dashboard" }} />} 
