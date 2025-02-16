@@ -80,7 +80,7 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       const { data, error } = await supabase
         .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*")
-        .order("Date de création", { ascending: false })
+        .order('id', { ascending: false }) // Order by id descending to get the most recently added companies
         .limit(3);
 
       if (error) {
