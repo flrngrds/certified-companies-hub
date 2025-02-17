@@ -18,7 +18,7 @@ export const useSubscription = () => {
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle(); // Changed from .single() to .maybeSingle()
 
         if (dbError) {
           console.error('Error fetching from database:', dbError);
