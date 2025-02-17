@@ -16,12 +16,12 @@ export const useSubscription = () => {
           return;
         }
 
-        // Query stripe_customers table
+        // Query stripe_customers table using maybeSingle() instead of single()
         const { data: customerData, error: dbError } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         console.log('Customer query result:', { customerData, dbError });
 
@@ -31,8 +31,9 @@ export const useSubscription = () => {
           return;
         }
 
+        // Handle case where no customer record exists
         if (!customerData) {
-          console.log('No customer data found');
+          console.log('No customer data found, setting plan to Free');
           setCurrentPlan("Free");
           return;
         }
