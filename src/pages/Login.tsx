@@ -11,20 +11,35 @@ import { supabase } from "@/integrations/supabase/client";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (error) {
-        throw error;
+        if (error.message === "Invalid login credentials") {
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "The email or password you entered is incorrect. Please try again.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: error.message,
+          });
+        }
+        return;
       }
 
       if (data.user) {
@@ -38,8 +53,10 @@ const Login = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,6 +77,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -71,6 +89,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="flex justify-end">
@@ -81,8 +100,8 @@ const Login = () => {
                 Forgot your password?
               </Link>
             </div>
-            <Button type="submit" className="w-full">
-              Log In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Log In"}
             </Button>
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{" "}
