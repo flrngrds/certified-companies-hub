@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -61,6 +60,7 @@ const App = () => {
             />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/export-leads" element={<LeadsExport />} />
             
             {/* Protected routes */}
             <Route 
@@ -70,10 +70,6 @@ const App = () => {
             <Route 
               path="/profile" 
               element={session ? <Profile /> : <Navigate to="/login" state={{ from: "/profile" }} />} 
-            />
-            <Route 
-              path="/export-leads" 
-              element={session ? <LeadsExport /> : <Navigate to="/login" state={{ from: "/export-leads" }} />} 
             />
             
             {/* Root redirect */}

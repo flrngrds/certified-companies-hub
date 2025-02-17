@@ -11,6 +11,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 const LeadsExport = () => {
   const [countries, setCountries] = useState<string[]>([]);
@@ -32,7 +33,6 @@ const LeadsExport = () => {
 
       if (error) throw error;
 
-      // Get unique countries
       const uniqueCountries = Array.from(new Set(data.map(item => item.Country)));
       setCountries(uniqueCountries);
     } catch (error) {
@@ -62,7 +62,7 @@ const LeadsExport = () => {
         .select("*")
         .eq("Country", selectedCountry)
         .order("id", { ascending: false })
-        .limit(20);
+        .limit(15); // Changed from 20 to 15
 
       if (error) throw error;
 
@@ -79,6 +79,7 @@ const LeadsExport = () => {
       const csvData = data.map(company => ({
         Company: company.Entreprise || "",
         Website: company.Website || "",
+        Link: company.Lien || "", // Added Link column
         CertificationLevel: company.Niveau || "",
         Industry: company.Industry || "",
         Country: company.Country || "",
@@ -127,6 +128,25 @@ const LeadsExport = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <nav className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-semibold text-gray-900">
+              VadiBase
+            </div>
+            <div className="space-x-4">
+              <Link to="/login">
+                <Button variant="outline">Log in</Button>
+              </Link>
+              <Link to="/signup">
+                <Button>Sign up</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div className="container mx-auto px-4 py-8">
         {/* SEO Meta Tag */}
         <meta name="robots" content="noindex" />
@@ -172,7 +192,7 @@ const LeadsExport = () => {
             </Button>
 
             <p className="text-sm text-gray-500 mt-4">
-              This will export the 20 most recently added companies from the selected country.
+              This will export the 15 most recently added companies from the selected country.
             </p>
           </div>
         </div>
