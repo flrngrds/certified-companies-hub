@@ -26,7 +26,7 @@ const Profile = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle(); // Changed from .single() to .maybeSingle()
 
       setUserData({
         name: profile ? `${profile.first_name} ${profile.last_name}`.trim() : "",
