@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import LeadsExport from "./pages/LeadsExport";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,10 @@ const App = () => {
             <Route 
               path="/profile" 
               element={session ? <Profile /> : <Navigate to="/login" state={{ from: "/profile" }} />} 
+            />
+            <Route 
+              path="/export-leads" 
+              element={session ? <LeadsExport /> : <Navigate to="/login" state={{ from: "/export-leads" }} />} 
             />
             
             {/* Root redirect */}
