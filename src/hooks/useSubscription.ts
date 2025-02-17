@@ -17,29 +17,14 @@ export const useSubscription = () => {
           return;
         }
 
-        // First try to get data from stripe_customers table
+        // First try to get data directly from stripe_customers table
         const { data: customerData, error: dbError } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
-        // Enhanced logging
-        console.log('User ID:', session.user.id);
-        console.log('Customer Data:', customerData);
-        console.log('DB Error:', dbError);
-
-        // If there's a database error or no data, fallback to edge function
-        if (dbError || !customerData) {
-          console.log('Falling back to edge function due to:', dbError || 'no customer data');
-          const { data, error } = await supabase.functions.invoke('check-subscription');
-          if (error) {
-            console.error('Edge function error:', error);
-            throw error;
-          }
-          setCurrentPlan(data.plan);
-          return;
-        }
+        console.log('Raw customer data:', customerData); // Debug log
 
         // Map price IDs to plan names
         const planMap: { [key: string]: string } = {
@@ -48,23 +33,41 @@ export const useSubscription = () => {
           'price_1QGMsvG4TGR1Qn6rghOqEU8H': 'Enterprise'
         };
 
-        // Log subscription details
-        console.log('Subscription Status:', customerData.subscription_status);
-        console.log('Price ID:', customerData.price_id);
-        console.log('Mapped Plan:', planMap[customerData.price_id]);
-
-        // Check subscription status and set plan
-        if (customerData.subscription_status === 'active' || 
-            customerData.subscription_status === 'trialing') {
+        // If we have customer data and subscription is active/trialing
+        if (customerData && 
+           (customerData.subscription_status === 'active' || 
+            customerData.subscription_status === 'trialing')) {
           const plan = planMap[customerData.price_id];
+          console.log('Found active subscription:', {
+            status: customerData.subscription_status,
+            priceId: customerData.price_id,
+            mappedPlan: plan
+          });
+          
           if (plan) {
             setCurrentPlan(plan);
             return;
           }
         }
 
-        // If we get here, set plan to Free
-        console.log('No active subscription found, setting plan to Free');
+        // If no valid subscription found in database, try edge function
+        console.log('No valid subscription in database, checking edge function');
+        const { data, error } = await supabase.functions.invoke('check-subscription');
+        
+        if (error) {
+          console.error('Edge function error:', error);
+          setCurrentPlan("Free");
+          return;
+        }
+
+        if (data && data.plan) {
+          console.log('Edge function returned plan:', data.plan);
+          setCurrentPlan(data.plan);
+          return;
+        }
+
+        // Final fallback
+        console.log('No subscription found, defaulting to Free');
         setCurrentPlan("Free");
       } catch (error) {
         console.error('Error in subscription check:', error);
@@ -85,8 +88,8 @@ export const useSubscription = () => {
           schema: 'public',
           table: 'stripe_customers'
         },
-        () => {
-          console.log('Subscription data changed, rechecking...');
+        (payload) => {
+          console.log('Subscription data changed:', payload);
           checkSubscription();
         }
       )
