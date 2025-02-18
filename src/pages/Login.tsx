@@ -15,11 +15,26 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Check for existing session on component mount
+  useState(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
+    };
+    checkSession();
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      // Clear any existing session first
+      await supabase.auth.signOut();
+      
+      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -32,6 +47,14 @@ const Login = () => {
             title: "Login Failed",
             description: "The email or password you entered is incorrect. Please try again.",
           });
+        } else if (error.message.includes("Invalid Refresh Token")) {
+          toast({
+            variant: "destructive",
+            title: "Session Error",
+            description: "There was an issue with your session. Please try logging in again.",
+          });
+          // Force a clean sign out
+          await supabase.auth.signOut();
         } else {
           toast({
             variant: "destructive",
@@ -43,6 +66,13 @@ const Login = () => {
       }
 
       if (data.user) {
+        // Set up auth state change listener
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            console.log('User signed in successfully:', session.user.id);
+          }
+        });
+
         toast({
           title: "Success",
           description: "Logged in successfully",
@@ -55,6 +85,7 @@ const Login = () => {
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
       });
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
