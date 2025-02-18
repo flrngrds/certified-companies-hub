@@ -51,7 +51,7 @@ export const useSubscription = () => {
         console.log('Price ID:', customerData.price_id);
 
         // Include both 'active' and 'trialing' statuses
-        if (customerData.subscription_status === 'active' || customerData.subscription_status === 'trialing') {
+        if ((customerData.subscription_status === 'active' || customerData.subscription_status === 'trialing') && customerData.price_id) {
           const plan = planMap[customerData.price_id];
           if (plan) {
             console.log(`Setting plan to ${plan} based on price_id ${customerData.price_id}`);
@@ -68,13 +68,10 @@ export const useSubscription = () => {
       }
     };
 
-    // Initial check and set up real-time subscription
-    const setupSubscription = async () => {
-      // Get the initial session
+    const setupRealTimeSubscription = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user?.id) {
-        // Set up real-time subscription with the user ID
         const channel = supabase
           .channel('stripe_customers_changes')
           .on(
@@ -85,25 +82,32 @@ export const useSubscription = () => {
               table: 'stripe_customers',
               filter: `id=eq.${session.user.id}`
             },
-            (payload) => {
-              console.log('Subscription data changed:', payload);
+            () => {
+              console.log('Subscription changed, rechecking status...');
               checkSubscription();
             }
           )
           .subscribe();
 
-        // Cleanup function
         return () => {
+          console.log('Cleaning up subscription...');
           supabase.removeChannel(channel);
         };
       }
     };
 
-    // Initial subscription check
+    // Initial check
     checkSubscription();
     
-    // Setup realtime subscription
-    setupSubscription();
+    // Setup real-time listener
+    const cleanup = setupRealTimeSubscription();
+
+    // Cleanup on unmount
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
   }, []);
 
   return { currentPlan };
