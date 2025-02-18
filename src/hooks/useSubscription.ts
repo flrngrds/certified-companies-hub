@@ -68,31 +68,42 @@ export const useSubscription = () => {
       }
     };
 
-    // Initial check
-    checkSubscription();
+    // Initial check and set up real-time subscription
+    const setupSubscription = async () => {
+      // Get the initial session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user?.id) {
+        // Set up real-time subscription with the user ID
+        const channel = supabase
+          .channel('stripe_customers_changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'stripe_customers',
+              filter: `id=eq.${session.user.id}`
+            },
+            (payload) => {
+              console.log('Subscription data changed:', payload);
+              checkSubscription();
+            }
+          )
+          .subscribe();
 
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('stripe_customers_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'stripe_customers',
-          filter: `id=eq.${supabase.auth.getSession()?.data?.session?.user?.id}`
-        },
-        (payload) => {
-          console.log('Subscription data changed:', payload);
-          checkSubscription();
-        }
-      )
-      .subscribe();
-
-    // Cleanup
-    return () => {
-      supabase.removeChannel(channel);
+        // Cleanup function
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      }
     };
+
+    // Initial subscription check
+    checkSubscription();
+    
+    // Setup realtime subscription
+    setupSubscription();
   }, []);
 
   return { currentPlan };
