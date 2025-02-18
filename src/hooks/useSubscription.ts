@@ -68,46 +68,56 @@ export const useSubscription = () => {
       }
     };
 
-    const setupRealTimeSubscription = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user?.id) {
-        const channel = supabase
-          .channel('stripe_customers_changes')
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'stripe_customers',
-              filter: `id=eq.${session.user.id}`
-            },
-            () => {
-              console.log('Subscription changed, rechecking status...');
-              checkSubscription();
-            }
-          )
-          .subscribe();
+    const setupRealTimeSubscription = () => {
+      let cleanup: (() => void) | undefined;
 
-        return () => {
-          console.log('Cleaning up subscription...');
-          supabase.removeChannel(channel);
-        };
-      }
+      const setup = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user?.id) {
+          const channel = supabase
+            .channel('stripe_customers_changes')
+            .on(
+              'postgres_changes',
+              {
+                event: '*',
+                schema: 'public',
+                table: 'stripe_customers',
+                filter: `id=eq.${session.user.id}`
+              },
+              () => {
+                console.log('Subscription changed, rechecking status...');
+                checkSubscription();
+              }
+            )
+            .subscribe();
+
+          cleanup = () => {
+            console.log('Cleaning up subscription...');
+            supabase.removeChannel(channel);
+          };
+        }
+      };
+
+      // Run the setup
+      setup();
+
+      // Return the cleanup function
+      return () => {
+        if (cleanup) {
+          cleanup();
+        }
+      };
     };
 
     // Initial check
     checkSubscription();
     
-    // Setup real-time listener
+    // Setup real-time listener and get cleanup function
     const cleanup = setupRealTimeSubscription();
 
-    // Cleanup on unmount
-    return () => {
-      if (cleanup) {
-        cleanup();
-      }
-    };
+    // Return cleanup function for useEffect
+    return cleanup;
   }, []);
 
   return { currentPlan };
