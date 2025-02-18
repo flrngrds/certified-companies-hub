@@ -6,6 +6,20 @@ export const useSubscription = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("Loading...");
 
   useEffect(() => {
+    // Set up auth state change listener
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          setCurrentPlan("Free");
+          return;
+        }
+
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          checkSubscription();
+        }
+      }
+    );
+
     const checkSubscription = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -99,10 +113,8 @@ export const useSubscription = () => {
         }
       };
 
-      // Run the setup
       setup();
 
-      // Return the cleanup function
       return () => {
         if (cleanup) {
           cleanup();
@@ -113,11 +125,14 @@ export const useSubscription = () => {
     // Initial check
     checkSubscription();
     
-    // Setup real-time listener and get cleanup function
-    const cleanup = setupRealTimeSubscription();
+    // Setup real-time listener
+    const realtimeCleanup = setupRealTimeSubscription();
 
     // Return cleanup function for useEffect
-    return cleanup;
+    return () => {
+      authSubscription.unsubscribe();
+      realtimeCleanup();
+    };
   }, []);
 
   return { currentPlan };
