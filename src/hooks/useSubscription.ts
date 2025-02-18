@@ -16,7 +16,9 @@ export const useSubscription = () => {
           return;
         }
 
-        // Query stripe_customers table using maybeSingle() instead of single()
+        console.log('Checking subscription for user:', session.user.id);
+
+        // Query stripe_customers table
         const { data: customerData, error: dbError } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
@@ -37,6 +39,8 @@ export const useSubscription = () => {
           setCurrentPlan("Free");
           return;
         }
+
+        console.log('Found customer data:', customerData);
 
         // Map price IDs to plan names
         const planMap: { [key: string]: string } = {
@@ -75,10 +79,11 @@ export const useSubscription = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'stripe_customers'
+          table: 'stripe_customers',
+          filter: `id=eq.${supabase.auth.getSession()?.data?.session?.user?.id}`
         },
         (payload) => {
-          console.log('Subscription data changed, rechecking...');
+          console.log('Subscription data changed:', payload);
           checkSubscription();
         }
       )
