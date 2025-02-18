@@ -122,8 +122,18 @@ export const useSubscription = () => {
       };
     };
 
-    // Initial check
-    checkSubscription();
+    // Handle initial auth state check first
+    const initializeSubscription = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await checkSubscription();
+      } else {
+        setCurrentPlan("Free");
+      }
+    };
+
+    // Initial auth and subscription check
+    initializeSubscription();
     
     // Setup real-time listener
     const realtimeCleanup = setupRealTimeSubscription();
