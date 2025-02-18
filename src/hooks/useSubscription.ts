@@ -18,7 +18,7 @@ export const useSubscription = () => {
 
         console.log('Checking subscription for user:', session.user.id);
 
-        // Query stripe_customers table
+        // Query stripe_customers table with specific columns
         const { data: customerData, error: dbError } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
@@ -40,8 +40,6 @@ export const useSubscription = () => {
           return;
         }
 
-        console.log('Found customer data:', customerData);
-
         // Map price IDs to plan names
         const planMap: { [key: string]: string } = {
           'price_1QGMpIG4TGR1Qn6rUc16QbuT': 'Basic',
@@ -49,9 +47,8 @@ export const useSubscription = () => {
           'price_1QGMsvG4TGR1Qn6rghOqEU8H': 'Enterprise'
         };
 
-        // Direct check for active subscription
-        if (customerData.subscription_status === 'active' || 
-            customerData.subscription_status === 'trialing') {
+        // Direct check for active subscription and price_id
+        if (customerData.subscription_status === 'active') {
           const plan = planMap[customerData.price_id];
           if (plan) {
             console.log(`Setting plan to ${plan} based on price_id ${customerData.price_id}`);
