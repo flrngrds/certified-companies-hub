@@ -10,10 +10,22 @@ export const useSubscription = () => {
 
     const checkSubscription = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.log('Session error:', sessionError);
+          setCurrentPlan("Free");
+          return;
+        }
         
         if (!session) {
           console.log('No session found, setting plan to Free');
+          setCurrentPlan("Free");
+          return;
+        }
+
+        if (!session.user?.id) {
+          console.log('No user ID in session, setting plan to Free');
           setCurrentPlan("Free");
           return;
         }
@@ -75,10 +87,10 @@ export const useSubscription = () => {
 
     const setupRealTimeSubscription = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session?.user?.id) {
-          console.log('No active session for realtime subscription');
+        if (sessionError || !session?.user?.id) {
+          console.log('No valid session for realtime subscription');
           return;
         }
 
@@ -95,7 +107,8 @@ export const useSubscription = () => {
             {
               event: '*',
               schema: 'public',
-              table: 'stripe_customers'
+              table: 'stripe_customers',
+              filter: `id=eq.${session.user.id}`
             },
             async (payload) => {
               console.log('Subscription change detected:', payload);
@@ -111,11 +124,6 @@ export const useSubscription = () => {
       }
     };
 
-    // Initial setup
-    checkSubscription().then(() => {
-      setupRealTimeSubscription();
-    });
-
     // Auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       console.log('Auth state changed:', event);
@@ -130,6 +138,15 @@ export const useSubscription = () => {
         }
       }
     });
+
+    // Only check subscription if we're not on the login page
+    if (window.location.pathname !== '/login') {
+      checkSubscription().then(() => {
+        setupRealTimeSubscription();
+      });
+    } else {
+      setCurrentPlan('Free');
+    }
 
     // Cleanup
     return () => {
