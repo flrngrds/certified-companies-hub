@@ -6,19 +6,7 @@ export const useSubscription = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("Loading...");
 
   useEffect(() => {
-    // Set up auth state change listener
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_OUT') {
-          setCurrentPlan("Free");
-          return;
-        }
-
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          checkSubscription();
-        }
-      }
-    );
+    let realTimeChannel: ReturnType<typeof supabase.channel> | null = null;
 
     const checkSubscription = async () => {
       try {
@@ -83,65 +71,66 @@ export const useSubscription = () => {
     };
 
     const setupRealTimeSubscription = () => {
-      let cleanup: (() => void) | undefined;
-
-      const setup = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user?.id) {
-          const channel = supabase
-            .channel('stripe_customers_changes')
-            .on(
-              'postgres_changes',
-              {
-                event: '*',
-                schema: 'public',
-                table: 'stripe_customers',
-                filter: `id=eq.${session.user.id}`
-              },
-              () => {
-                console.log('Subscription changed, rechecking status...');
-                checkSubscription();
-              }
-            )
-            .subscribe();
-
-          cleanup = () => {
-            console.log('Cleaning up subscription...');
-            supabase.removeChannel(channel);
-          };
+      const { data: { session } } = supabase.auth.getSession();
+      
+      if (session?.user?.id) {
+        // Clean up any existing subscription
+        if (realTimeChannel) {
+          supabase.removeChannel(realTimeChannel);
         }
-      };
 
-      setup();
-
-      return () => {
-        if (cleanup) {
-          cleanup();
-        }
-      };
-    };
-
-    // Handle initial auth state check first
-    const initializeSubscription = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await checkSubscription();
-      } else {
-        setCurrentPlan("Free");
+        realTimeChannel = supabase
+          .channel('stripe_customers_changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'stripe_customers',
+              filter: `id=eq.${session.user.id}`
+            },
+            (payload) => {
+              console.log('Subscription change detected:', payload);
+              checkSubscription();
+            }
+          )
+          .subscribe((status) => {
+            console.log('Realtime subscription status:', status);
+          });
       }
     };
 
-    // Initial auth and subscription check
-    initializeSubscription();
-    
-    // Setup real-time listener
-    const realtimeCleanup = setupRealTimeSubscription();
+    // Set up auth state change listener
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event);
+        
+        if (event === 'SIGNED_OUT') {
+          setCurrentPlan("Free");
+          if (realTimeChannel) {
+            supabase.removeChannel(realTimeChannel);
+            realTimeChannel = null;
+          }
+          return;
+        }
 
-    // Return cleanup function for useEffect
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await checkSubscription();
+          setupRealTimeSubscription();
+        }
+      }
+    );
+
+    // Initial check and setup
+    checkSubscription();
+    setupRealTimeSubscription();
+
+    // Cleanup
     return () => {
+      if (realTimeChannel) {
+        supabase.removeChannel(realTimeChannel);
+      }
       authSubscription.unsubscribe();
-      realtimeCleanup();
     };
   }, []);
 
