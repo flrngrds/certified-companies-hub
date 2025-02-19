@@ -70,8 +70,9 @@ export const useSubscription = () => {
       }
     };
 
-    const setupRealTimeSubscription = () => {
-      const { data: { session } } = supabase.auth.getSession();
+    const setupRealTimeSubscription = async () => {
+      const sessionResponse = await supabase.auth.getSession();
+      const session = sessionResponse.data.session;
       
       if (session?.user?.id) {
         // Clean up any existing subscription
@@ -116,14 +117,17 @@ export const useSubscription = () => {
 
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           await checkSubscription();
-          setupRealTimeSubscription();
+          await setupRealTimeSubscription();
         }
       }
     );
 
     // Initial check and setup
-    checkSubscription();
-    setupRealTimeSubscription();
+    const initialize = async () => {
+      await checkSubscription();
+      await setupRealTimeSubscription();
+    };
+    initialize();
 
     // Cleanup
     return () => {
