@@ -25,12 +25,17 @@ export const useSubscription = () => {
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
-          .single();
-
-        console.log('Raw customer data:', customerData);
+          .maybeSingle();
 
         if (dbError) {
           console.error('Database error:', dbError);
+          setCurrentPlan("Free");
+          return;
+        }
+
+        // If no customer data found, return Free plan
+        if (!customerData) {
+          console.log('No customer record found, setting to Free plan');
           setCurrentPlan("Free");
           return;
         }
@@ -42,13 +47,19 @@ export const useSubscription = () => {
           'price_1QGMsvG4TGR1Qn6rghOqEU8H': 'Enterprise'
         };
 
-        console.log('Subscription status:', customerData?.subscription_status);
-        console.log('Price ID:', customerData?.price_id);
+        const status = customerData.subscription_status;
+        const priceId = customerData.price_id;
 
-        if (customerData?.subscription_status === 'active' && customerData?.price_id) {
-          const plan = planMap[customerData.price_id];
-          if (plan) {
-            console.log(`Setting plan to ${plan} based on price_id ${customerData.price_id}`);
+        console.log('Customer data:', {
+          status,
+          priceId,
+          mappedPlan: planMap[priceId]
+        });
+
+        if (status === 'active' || status === 'trialing') {
+          if (priceId && planMap[priceId]) {
+            const plan = planMap[priceId];
+            console.log(`Setting active plan: ${plan}`);
             setCurrentPlan(plan);
             return;
           }
@@ -63,41 +74,69 @@ export const useSubscription = () => {
     };
 
     const setupRealTimeSubscription = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user?.id) {
-        if (realTimeChannel) {
-          supabase.removeChannel(realTimeChannel);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user?.id) {
+          console.log('No active session for realtime subscription');
+          return;
         }
 
+        if (realTimeChannel) {
+          console.log('Removing existing channel');
+          await supabase.removeChannel(realTimeChannel);
+        }
+
+        console.log('Setting up realtime subscription');
         realTimeChannel = supabase
-          .channel(`stripe_customers_${session.user.id}`)
+          .channel(`stripe_customers_${Date.now()}`)
           .on(
             'postgres_changes',
             {
               event: '*',
               schema: 'public',
-              table: 'stripe_customers',
-              filter: `id=eq.${session.user.id}`
+              table: 'stripe_customers'
             },
             async (payload) => {
               console.log('Subscription change detected:', payload);
               await checkSubscription();
             }
           )
-          .subscribe();
+          .subscribe((status) => {
+            console.log('Channel status:', status);
+          });
+
+      } catch (error) {
+        console.error('Error setting up realtime subscription:', error);
       }
     };
 
-    // Initial check and setup
-    checkSubscription();
-    setupRealTimeSubscription();
+    // Initial setup
+    checkSubscription().then(() => {
+      setupRealTimeSubscription();
+    });
+
+    // Auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      console.log('Auth state changed:', event);
+      if (event === 'SIGNED_IN') {
+        checkSubscription().then(() => {
+          setupRealTimeSubscription();
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentPlan('Free');
+        if (realTimeChannel) {
+          supabase.removeChannel(realTimeChannel);
+        }
+      }
+    });
 
     // Cleanup
     return () => {
       if (realTimeChannel) {
         supabase.removeChannel(realTimeChannel);
       }
+      subscription.unsubscribe();
     };
   }, []);
 
