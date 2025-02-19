@@ -6,49 +6,42 @@ export const useSubscription = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("Loading...");
 
   useEffect(() => {
-    let realTimeChannel: ReturnType<typeof supabase.channel> | null = null;
-
     const checkSubscription = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session?.user?.id) {
-          setCurrentPlan("Free");
-          return;
-        }
-
-        const { data: customerData, error: dbError } = await supabase
-          .from('stripe_customers')
-          .select('subscription_status, price_id')
-          .eq('id', session.user.id)
-          .maybeSingle();
-
-        if (dbError) {
-          console.error('Database error:', dbError);
-          setCurrentPlan("Free");
-          return;
-        }
-
-        console.log('Raw customer data:', customerData);
-
-        // Map price IDs to plan names
-        const planMap: { [key: string]: string } = {
-          'price_1QGMpIG4TGR1Qn6rUc16QbuT': 'Basic',
-          'price_1QGMsMG4TGR1Qn6retfbREsl': 'Premium',
-          'price_1QGMsvG4TGR1Qn6rghOqEU8H': 'Enterprise'
-        };
-
-        if (customerData?.subscription_status === 'active' && customerData?.price_id) {
-          const plan = planMap[customerData.price_id];
-          if (plan) {
-            setCurrentPlan(plan);
-            return;
-          }
-        }
-
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user?.id) {
         setCurrentPlan("Free");
-      } catch (error) {
-        console.error('Error in subscription check:', error);
+        return;
+      }
+
+      const { data } = await supabase
+        .from('stripe_customers')
+        .select('subscription_status, price_id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!data) {
+        setCurrentPlan("Free");
+        return;
+      }
+
+      console.log('Customer subscription data:', data);
+
+      if (data.subscription_status === 'active') {
+        switch (data.price_id) {
+          case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
+            setCurrentPlan('Basic');
+            break;
+          case 'price_1QGMsMG4TGR1Qn6retfbREsl':
+            setCurrentPlan('Premium');
+            break;
+          case 'price_1QGMsvG4TGR1Qn6rghOqEU8H':
+            setCurrentPlan('Enterprise');
+            break;
+          default:
+            setCurrentPlan('Free');
+        }
+      } else {
         setCurrentPlan("Free");
       }
     };
@@ -56,7 +49,7 @@ export const useSubscription = () => {
     // Initial check
     checkSubscription();
 
-    // Set up realtime subscription for changes
+    // Set up realtime subscription
     const channel = supabase
       .channel('stripe_customers_changes')
       .on(
@@ -66,9 +59,7 @@ export const useSubscription = () => {
           schema: 'public',
           table: 'stripe_customers'
         },
-        () => {
-          checkSubscription();
-        }
+        checkSubscription
       )
       .subscribe();
 
