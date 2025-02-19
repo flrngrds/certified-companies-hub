@@ -10,29 +10,13 @@ export const useSubscription = () => {
 
     const checkSubscription = async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (sessionError) {
-          console.log('Session error:', sessionError);
-          setCurrentPlan("Free");
-          return;
-        }
-        
-        if (!session) {
-          console.log('No session found, setting plan to Free');
+        if (!session?.user?.id) {
           setCurrentPlan("Free");
           return;
         }
 
-        if (!session.user?.id) {
-          console.log('No user ID in session, setting plan to Free');
-          setCurrentPlan("Free");
-          return;
-        }
-
-        console.log('Checking subscription for user:', session.user.id);
-
-        // Query stripe_customers table to check subscription status
         const { data: customerData, error: dbError } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
@@ -45,12 +29,7 @@ export const useSubscription = () => {
           return;
         }
 
-        // If no customer data found, return Free plan
-        if (!customerData) {
-          console.log('No customer record found, setting to Free plan');
-          setCurrentPlan("Free");
-          return;
-        }
+        console.log('Raw customer data:', customerData);
 
         // Map price IDs to plan names
         const planMap: { [key: string]: string } = {
@@ -59,25 +38,14 @@ export const useSubscription = () => {
           'price_1QGMsvG4TGR1Qn6rghOqEU8H': 'Enterprise'
         };
 
-        const status = customerData.subscription_status;
-        const priceId = customerData.price_id;
-
-        console.log('Customer data:', {
-          status,
-          priceId,
-          mappedPlan: planMap[priceId]
-        });
-
-        if (status === 'active' || status === 'trialing') {
-          if (priceId && planMap[priceId]) {
-            const plan = planMap[priceId];
-            console.log(`Setting active plan: ${plan}`);
+        if (customerData?.subscription_status === 'active' && customerData?.price_id) {
+          const plan = planMap[customerData.price_id];
+          if (plan) {
             setCurrentPlan(plan);
             return;
           }
         }
 
-        console.log('No active subscription found, setting to Free');
         setCurrentPlan("Free");
       } catch (error) {
         console.error('Error in subscription check:', error);
@@ -85,75 +53,27 @@ export const useSubscription = () => {
       }
     };
 
-    const setupRealTimeSubscription = async () => {
-      try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError || !session?.user?.id) {
-          console.log('No valid session for realtime subscription');
-          return;
+    // Initial check
+    checkSubscription();
+
+    // Set up realtime subscription for changes
+    const channel = supabase
+      .channel('stripe_customers_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'stripe_customers'
+        },
+        () => {
+          checkSubscription();
         }
+      )
+      .subscribe();
 
-        if (realTimeChannel) {
-          console.log('Removing existing channel');
-          await supabase.removeChannel(realTimeChannel);
-        }
-
-        console.log('Setting up realtime subscription');
-        realTimeChannel = supabase
-          .channel(`stripe_customers_${Date.now()}`)
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'stripe_customers',
-              filter: `id=eq.${session.user.id}`
-            },
-            async (payload) => {
-              console.log('Subscription change detected:', payload);
-              await checkSubscription();
-            }
-          )
-          .subscribe((status) => {
-            console.log('Channel status:', status);
-          });
-
-      } catch (error) {
-        console.error('Error setting up realtime subscription:', error);
-      }
-    };
-
-    // Auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      console.log('Auth state changed:', event);
-      if (event === 'SIGNED_IN') {
-        checkSubscription().then(() => {
-          setupRealTimeSubscription();
-        });
-      } else if (event === 'SIGNED_OUT') {
-        setCurrentPlan('Free');
-        if (realTimeChannel) {
-          supabase.removeChannel(realTimeChannel);
-        }
-      }
-    });
-
-    // Only check subscription if we're not on the login page
-    if (window.location.pathname !== '/login') {
-      checkSubscription().then(() => {
-        setupRealTimeSubscription();
-      });
-    } else {
-      setCurrentPlan('Free');
-    }
-
-    // Cleanup
     return () => {
-      if (realTimeChannel) {
-        supabase.removeChannel(realTimeChannel);
-      }
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 
