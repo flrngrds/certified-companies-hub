@@ -20,6 +20,12 @@ export const useSubscription = () => {
 
         console.log('Checking subscription for user:', session.user.id);
 
+        // First enable real-time for the table
+        await supabase
+          .from('stripe_customers')
+          .select('*')
+          .limit(0);
+
         // Query stripe_customers table to check subscription status
         const { data: customerData, error: dbError } = await supabase
           .from('stripe_customers')
@@ -90,13 +96,16 @@ export const useSubscription = () => {
               table: 'stripe_customers',
               filter: `id=eq.${session.user.id}`
             },
-            (payload) => {
+            async (payload) => {
               console.log('Subscription change detected:', payload);
-              checkSubscription();
+              await checkSubscription();
             }
           )
           .subscribe((status) => {
             console.log('Realtime subscription status:', status);
+            if (status === 'SUBSCRIBED') {
+              checkSubscription();
+            }
           });
       }
     };

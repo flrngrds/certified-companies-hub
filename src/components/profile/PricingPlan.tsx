@@ -29,7 +29,10 @@ export const PricingPlan = ({
   onSubscribe,
 }: PricingPlanProps) => {
   const getPlanButton = () => {
-    if (currentPlan.toLowerCase() === name.toLowerCase()) {
+    const normalizedCurrentPlan = currentPlan.toLowerCase();
+    const normalizedName = name.toLowerCase();
+
+    if (normalizedCurrentPlan === normalizedName) {
       return (
         <Button 
           className="w-full bg-[#E2FFC8] text-gray-700 hover:bg-[#E2FFC8] cursor-not-allowed"
@@ -40,21 +43,23 @@ export const PricingPlan = ({
       );
     }
 
-    const isUpgrade = ['Basic', 'Premium', 'Enterprise'].indexOf(name) > 
-                      ['Basic', 'Premium', 'Enterprise'].indexOf(currentPlan);
+    const planOrder = ['free', 'basic', 'premium', 'enterprise'];
+    const currentPlanIndex = planOrder.indexOf(normalizedCurrentPlan);
+    const newPlanIndex = planOrder.indexOf(normalizedName);
+    const isUpgrade = newPlanIndex > currentPlanIndex;
 
     return (
       <Button 
         className="w-full bg-primary text-white hover:bg-primary-hover"
         onClick={() => onSubscribe(priceId)}
       >
-        {currentPlan === 'free' ? 'Get Started' : (isUpgrade ? 'Upgrade' : 'Downgrade')}
+        {normalizedCurrentPlan === 'free' ? 'Get Started' : (isUpgrade ? 'Upgrade' : 'Downgrade')}
       </Button>
     );
   };
 
   return (
-    <Card className={`p-6 relative ${currentPlan === name ? 'bg-gray-50' : ''}`}>
+    <Card className={`p-6 relative ${currentPlan.toLowerCase() === name.toLowerCase() ? 'bg-gray-50' : ''}`}>
       {badge && (
         <div className={`absolute -top-3 right-4 ${badge.color} text-white px-3 py-1 rounded-full text-sm`}>
           {badge.text} {badge.emoji}
