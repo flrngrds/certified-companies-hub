@@ -29,13 +29,20 @@ export const PricingPlan = ({
   onSubscribe,
 }: PricingPlanProps) => {
   const getPlanButton = () => {
-    const normalizedCurrentPlan = currentPlan.toLowerCase();
-    const normalizedName = name.toLowerCase();
+    // Convert both to lowercase and trim for consistent comparison
+    const normalizedCurrentPlan = currentPlan?.toLowerCase().trim() || '';
+    const normalizedName = name.toLowerCase().trim();
+
+    // Debug logs
+    console.log('Current Plan:', currentPlan, 'Normalized:', normalizedCurrentPlan);
+    console.log('Plan Name:', name, 'Normalized:', normalizedName);
+    console.log('Are plans equal?', normalizedCurrentPlan === normalizedName);
 
     if (normalizedCurrentPlan === normalizedName) {
       return (
         <Button 
-          className="w-full bg-[#E2FFC8] text-gray-700 hover:bg-[#E2FFC8] cursor-not-allowed"
+          variant="secondary"
+          className="w-full cursor-not-allowed"
           disabled
         >
           Current Plan
@@ -46,11 +53,15 @@ export const PricingPlan = ({
     const planOrder = ['free', 'basic', 'premium', 'enterprise'];
     const currentPlanIndex = planOrder.indexOf(normalizedCurrentPlan);
     const newPlanIndex = planOrder.indexOf(normalizedName);
+    
+    console.log('Plan indices:', { currentPlanIndex, newPlanIndex });
+    
     const isUpgrade = newPlanIndex > currentPlanIndex;
 
     return (
       <Button 
-        className="w-full bg-primary text-white hover:bg-primary-hover"
+        variant="default"
+        className="w-full"
         onClick={() => onSubscribe(priceId)}
       >
         {normalizedCurrentPlan === 'free' ? 'Get Started' : (isUpgrade ? 'Upgrade' : 'Downgrade')}
@@ -59,7 +70,9 @@ export const PricingPlan = ({
   };
 
   return (
-    <Card className={`p-6 relative ${currentPlan.toLowerCase() === name.toLowerCase() ? 'bg-gray-50' : ''}`}>
+    <Card className={`p-6 relative ${
+      currentPlan?.toLowerCase().trim() === name.toLowerCase().trim() ? 'bg-gray-50' : ''
+    }`}>
       {badge && (
         <div className={`absolute -top-3 right-4 ${badge.color} text-white px-3 py-1 rounded-full text-sm`}>
           {badge.text} {badge.emoji}
