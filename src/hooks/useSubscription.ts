@@ -7,27 +7,27 @@ export const useSubscription = () => {
 
   useEffect(() => {
     const checkSubscription = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user?.id) {
-        setCurrentPlan("Free");
-        return;
-      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user?.id) {
+          setCurrentPlan("Free");
+          return;
+        }
 
-      const { data } = await supabase
-        .from('stripe_customers')
-        .select('subscription_status, price_id')
-        .eq('id', session.user.id)
-        .single();
+        const { data } = await supabase
+          .from('stripe_customers')
+          .select('subscription_status, price_id')
+          .eq('id', session.user.id)
+          .maybeSingle(); // Changed from .single() to .maybeSingle()
 
-      if (!data) {
-        setCurrentPlan("Free");
-        return;
-      }
+        console.log('Customer subscription data:', data);
 
-      console.log('Customer subscription data:', data);
+        if (!data || data.subscription_status !== 'active') {
+          setCurrentPlan("Free");
+          return;
+        }
 
-      if (data.subscription_status === 'active') {
         switch (data.price_id) {
           case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
             setCurrentPlan('Basic');
@@ -41,7 +41,8 @@ export const useSubscription = () => {
           default:
             setCurrentPlan('Free');
         }
-      } else {
+      } catch (error) {
+        console.error('Subscription check error:', error);
         setCurrentPlan("Free");
       }
     };
