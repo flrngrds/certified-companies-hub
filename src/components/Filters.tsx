@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -65,18 +64,20 @@ export const Filters = ({
   };
 
   const handleFilterChange = (key: string, value: string) => {
+    // For certification level, keep existing logic
     if (key === "certLevel") {
       const newFilters = { ...filters };
-      
       if (["bronze", "silver", "gold", "platinum"].includes(value.toLowerCase())) {
         newFilters.certLevel = value.toLowerCase();
       } else {
         newFilters.certLevel = value === "non-certified" ? "non-certified" : value;
       }
-      
       setFilters(newFilters);
-    } else {
+    } else if (key === "country") {
+      // For country, preserve the original case
       setFilters(prev => ({ ...prev, [key]: value }));
+    } else {
+      setFilters(prev => ({ ...prev, [key]: value.toLowerCase() }));
     }
   };
 
@@ -157,7 +158,7 @@ export const Filters = ({
           {["United States", "United Kingdom", "Canada", "Germany", "France", "Japan", "Australia"].map((country) => (
             <div key={country} className="flex items-center space-x-2">
               <RadioGroupItem 
-                value={country.toLowerCase().replace(/\s+/g, '-')} 
+                value={country} // Remove toLowerCase()
                 id={country} 
                 className="border-white/50 text-white" 
               />
