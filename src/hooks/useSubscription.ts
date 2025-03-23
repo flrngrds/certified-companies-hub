@@ -26,7 +26,15 @@ export const useSubscription = () => {
         // First try to get from stripe_customers table
         const { data, error: dbError } = await supabase
           .from('stripe_customers')
-          .select('subscription_status, price_id, current_period_end')
+          .select('subscription_status, price_id')
+          .eq('id', session.user.id)
+          .eq('subscription_status', 'active')
+          .maybeSingle();
+
+        // Try to get current_period_end separately to handle potential DB schema inconsistencies
+        const { data: endDateData, error: endDateError } = await supabase
+          .from('stripe_customers')
+          .select('current_period_end')
           .eq('id', session.user.id)
           .eq('subscription_status', 'active')
           .maybeSingle();
@@ -55,8 +63,8 @@ export const useSubscription = () => {
           }
 
           // Set subscription end date if available
-          if (data.current_period_end) {
-            const endDate = new Date(data.current_period_end);
+          if (endDateData?.current_period_end) {
+            const endDate = new Date(endDateData.current_period_end);
             setSubscriptionEndDate(endDate.toISOString());
             console.log(`Subscription ends on: ${endDate.toLocaleDateString()}`);
             

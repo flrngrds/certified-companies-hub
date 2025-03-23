@@ -268,6 +268,7 @@ export type Database = {
         Row: {
           cancel_at_period_end: boolean | null
           created_at: string | null
+          current_period_end: string | null
           id: string
           price_id: string | null
           stripe_customer_id: string | null
@@ -279,6 +280,7 @@ export type Database = {
         Insert: {
           cancel_at_period_end?: boolean | null
           created_at?: string | null
+          current_period_end?: string | null
           id: string
           price_id?: string | null
           stripe_customer_id?: string | null
@@ -290,6 +292,7 @@ export type Database = {
         Update: {
           cancel_at_period_end?: boolean | null
           created_at?: string | null
+          current_period_end?: string | null
           id?: string
           price_id?: string | null
           stripe_customer_id?: string | null
