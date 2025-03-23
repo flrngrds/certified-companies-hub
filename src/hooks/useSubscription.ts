@@ -23,8 +23,8 @@ export const useSubscription = () => {
 
         console.log("Checking subscription for user:", session.user.email);
 
-        // First try to get from stripe_customers table
-        const { data, error: dbError } = await supabase
+        // First try to get subscription data from stripe_customers table
+        const { data: subscriptionData, error: subscriptionError } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
@@ -39,16 +39,16 @@ export const useSubscription = () => {
           .eq('subscription_status', 'active')
           .maybeSingle();
 
-        if (dbError) {
-          console.error('Error fetching local subscription data:', dbError);
+        if (subscriptionError) {
+          console.error('Error fetching subscription data:', subscriptionError);
           // Fall back to the edge function if there's a database error
         }
 
-        if (data?.subscription_status === 'active' && data?.price_id) {
-          console.log('Found active subscription in database:', data);
+        if (subscriptionData?.subscription_status === 'active' && subscriptionData?.price_id) {
+          console.log('Found active subscription in database:', subscriptionData);
           
           // Map price_id to plan name
-          switch (data.price_id) {
+          switch (subscriptionData.price_id) {
             case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
               setCurrentPlan('Basic');
               break;
