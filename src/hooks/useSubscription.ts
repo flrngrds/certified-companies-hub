@@ -18,6 +18,7 @@ export const useSubscription = () => {
         
         if (!session?.user?.id) {
           setCurrentPlan("Free");
+          setIsLoading(false);
           return;
         }
 
@@ -41,7 +42,7 @@ export const useSubscription = () => {
 
         if (subscriptionError) {
           console.error('Error fetching subscription data:', subscriptionError);
-          // Fall back to the edge function if there's a database error
+          // Continue to check with Stripe directly
         }
 
         if (subscriptionData?.subscription_status === 'active' && subscriptionData?.price_id) {
