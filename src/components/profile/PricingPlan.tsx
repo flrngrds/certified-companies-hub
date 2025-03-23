@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PlanFeatures } from "./PlanFeatures";
+import { useState } from "react";
 
 interface PricingPlanProps {
   name: string;
@@ -28,62 +29,66 @@ export const PricingPlan = ({
   badge,
   onSubscribe,
 }: PricingPlanProps) => {
-  const getPlanButton = () => {
-    // Convert both to lowercase and trim for consistent comparison
-    const normalizedCurrentPlan = currentPlan?.toLowerCase().trim() || '';
-    const normalizedName = name.toLowerCase().trim();
-
-    // Debug logs
-    console.log('Current Plan:', currentPlan, 'Normalized:', normalizedCurrentPlan);
-    console.log('Plan Name:', name, 'Normalized:', normalizedName);
-    console.log('Are plans equal?', normalizedCurrentPlan === normalizedName);
-
-    if (normalizedCurrentPlan === normalizedName) {
-      return (
-        <Button 
-          variant="secondary"
-          className="w-full cursor-not-allowed"
-          disabled
-        >
-          Current Plan
-        </Button>
-      );
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Normalize plan names for comparison
+  const normalizedCurrentPlan = currentPlan?.toLowerCase().trim() || '';
+  const normalizedName = name.toLowerCase().trim();
+  const isCurrentPlan = normalizedCurrentPlan === normalizedName;
+  
+  // Plan order for upgrade/downgrade logic
+  const planOrder = ['free', 'basic', 'premium', 'enterprise'];
+  const currentPlanIndex = planOrder.indexOf(normalizedCurrentPlan);
+  const newPlanIndex = planOrder.indexOf(normalizedName);
+  const isUpgrade = newPlanIndex > currentPlanIndex;
+  
+  const handleSubscribeClick = async () => {
+    setIsLoading(true);
+    try {
+      await onSubscribe(priceId);
+    } catch (error) {
+      console.error('Subscription error:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const planOrder = ['free', 'basic', 'premium', 'enterprise'];
-    const currentPlanIndex = planOrder.indexOf(normalizedCurrentPlan);
-    const newPlanIndex = planOrder.indexOf(normalizedName);
-    
-    console.log('Plan indices:', { currentPlanIndex, newPlanIndex });
-    
-    const isUpgrade = newPlanIndex > currentPlanIndex;
-
-    return (
-      <Button 
-        variant="default"
-        className="w-full"
-        onClick={() => onSubscribe(priceId)}
-      >
-        {normalizedCurrentPlan === 'free' ? 'Get Started' : (isUpgrade ? 'Upgrade' : 'Downgrade')}
-      </Button>
-    );
+  const getButtonText = () => {
+    if (isCurrentPlan) return 'Current Plan';
+    if (normalizedCurrentPlan === 'free') return 'Get Started';
+    return isUpgrade ? 'Upgrade' : 'Downgrade';
   };
 
   return (
     <Card className={`p-6 relative ${
-      currentPlan?.toLowerCase().trim() === name.toLowerCase().trim() ? 'bg-gray-50' : ''
+      isCurrentPlan ? 'bg-gray-50 border-primary' : ''
     }`}>
       {badge && (
-        <div className={`absolute -top-3 right-4 ${badge.color} text-white px-3 py-1 rounded-full text-sm`}>
+        <div className={`absolute -top-3 right-4 ${badge.color} text-white px-3 py-1 rounded-full text-sm font-medium`}>
           {badge.text} {badge.emoji}
         </div>
       )}
       <h3 className="text-xl font-semibold mb-2">{name} Plan</h3>
       <p className="text-4xl font-bold mb-1">${price}<span className="text-sm font-normal">/month</span></p>
       <p className="text-sm text-gray-600 mb-4">{billingPeriod}</p>
-      {getPlanButton()}
+      
+      <Button 
+        variant={isCurrentPlan ? "secondary" : "default"}
+        className="w-full"
+        disabled={isCurrentPlan || isLoading}
+        onClick={handleSubscribeClick}
+      >
+        {isLoading ? 'Processing...' : getButtonText()}
+      </Button>
+      
       <h4 className="font-semibold mb-4 mt-6">Features</h4>
       <PlanFeatures features={features} />
+      
+      {isCurrentPlan && (
+        <div className="mt-4 bg-primary/10 p-3 rounded-md text-sm">
+          <p className="font-medium text-primary">Your active plan</p>
+        </div>
+      )}
     </Card>
   );
 };

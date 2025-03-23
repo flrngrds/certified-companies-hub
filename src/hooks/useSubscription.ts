@@ -4,10 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const useSubscription = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("Loading...");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSubscription = async () => {
       try {
+        setIsLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session?.user?.id) {
@@ -15,13 +18,18 @@ export const useSubscription = () => {
           return;
         }
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
-          .maybeSingle(); // Changed from .single() to .maybeSingle()
+          .maybeSingle();
 
         console.log('Customer subscription data:', data);
+
+        if (error) {
+          console.error('Error fetching subscription:', error);
+          setError(error.message);
+        }
 
         if (!data || data.subscription_status !== 'active') {
           setCurrentPlan("Free");
@@ -43,7 +51,10 @@ export const useSubscription = () => {
         }
       } catch (error) {
         console.error('Subscription check error:', error);
+        setError(error.message);
         setCurrentPlan("Free");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -60,7 +71,10 @@ export const useSubscription = () => {
           schema: 'public',
           table: 'stripe_customers'
         },
-        checkSubscription
+        () => {
+          console.log('Stripe customer data changed, refreshing subscription status');
+          checkSubscription();
+        }
       )
       .subscribe();
 
@@ -69,5 +83,5 @@ export const useSubscription = () => {
     };
   }, []);
 
-  return { currentPlan };
+  return { currentPlan, isLoading, error };
 };

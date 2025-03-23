@@ -11,30 +11,39 @@ const corsHeaders = {
 serve(async (req) => {
   console.log("Webhook received:", req.method);
   
-  // Gestion des requêtes OPTIONS pour CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Initialiser Stripe avec la clé secrète
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    // Initialize Stripe with the secret key
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
+    }
+    
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2023-10-16',
     });
 
-    // Initialiser le client Supabase avec la clé de service
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    );
+    // Initialize Supabase client with service role key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Supabase credentials not configured');
+    }
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Récupérer la signature du webhook depuis les en-têtes
+    // Get the signature from request headers
     const signature = req.headers.get('stripe-signature');
     
     if (!signature) {
-      console.error('Signature manquante dans les en-têtes:', Object.fromEntries(req.headers.entries()));
+      console.error('Missing Stripe signature:', Object.fromEntries(req.headers.entries()));
       return new Response(
-        JSON.stringify({ error: 'Signature Stripe manquante' }),
+        JSON.stringify({ error: 'Missing Stripe signature' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -42,27 +51,27 @@ serve(async (req) => {
       );
     }
 
-    // Récupérer le contenu brut de la requête
-    const body = await req.text();
-    console.log("Contenu du webhook reçu:", body.substring(0, 100) + "...");
+    // Get the raw request body content
+    const rawBody = await req.text();
+    console.log("Webhook payload received (partial):", rawBody.substring(0, 100) + "...");
 
-    // Vérifier la signature du webhook pour sécuriser les appels
+    // Verify webhook signature for security
     let event;
     try {
       const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
       if (!webhookSecret) {
-        throw new Error('STRIPE_WEBHOOK_SECRET non configuré');
+        throw new Error('STRIPE_WEBHOOK_SECRET not configured');
       }
       
       event = stripe.webhooks.constructEvent(
-        body,
+        rawBody,
         signature,
         webhookSecret
       );
     } catch (err) {
-      console.error(`Erreur de signature du webhook: ${err.message}`);
+      console.error(`Webhook signature verification failed: ${err.message}`);
       return new Response(
-        JSON.stringify({ error: `Erreur de signature du webhook: ${err.message}` }),
+        JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -70,29 +79,38 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Événement Stripe reçu: ${event.type}`);
+    console.log(`Stripe event received: ${event.type}`);
 
-    // Traiter différents types d'événements Stripe
+    // Process different types of Stripe events
     switch (event.type) {
-      case 'checkout.session.completed':
+      case 'checkout.session.completed': {
         const session = event.data.object;
-        console.log("Session de paiement complétée:", session.id);
+        console.log("Checkout session completed:", session.id);
         
-        // Mettre à jour l'abonnement dans la base de données
-        await handleCheckoutCompleted(supabaseClient, stripe, session);
+        // Extract user ID from metadata if available
+        const userId = session.metadata?.user_id;
+        
+        if (userId) {
+          console.log(`User ID found in metadata: ${userId}`);
+          await handleCheckoutWithUserId(supabaseClient, stripe, session, userId);
+        } else {
+          console.log("No user ID in metadata, attempting to match by email");
+          await handleCheckoutCompleted(supabaseClient, stripe, session);
+        }
         break;
+      }
         
       case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
+      case 'customer.subscription.deleted': {
         const subscription = event.data.object;
-        console.log("Abonnement mis à jour:", subscription.id);
+        console.log(`Subscription ${event.type === 'customer.subscription.deleted' ? 'cancelled' : 'updated'}:`, subscription.id);
         
-        // Mettre à jour le statut de l'abonnement
         await handleSubscriptionUpdate(supabaseClient, subscription);
         break;
+      }
 
       default:
-        console.log(`Type d'événement non géré: ${event.type}`);
+        console.log(`Unhandled event type: ${event.type}`);
     }
 
     return new Response(
@@ -103,7 +121,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Erreur dans le webhook:', error);
+    console.error('Error processing webhook:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
@@ -114,34 +132,65 @@ serve(async (req) => {
   }
 });
 
-// Fonction pour gérer les événements checkout.session.completed
-async function handleCheckoutCompleted(supabaseClient, stripe, session) {
-  // Récupérer le client Stripe
-  const customer = session.customer;
-  console.log("Traitement du checkout pour le client:", customer);
+// Function to handle checkout events with user ID already known
+async function handleCheckoutWithUserId(supabaseClient, stripe, session, userId) {
+  console.log(`Processing checkout for known user ID: ${userId}`);
   
-  // Récupérer l'abonnement si disponible
   if (session.subscription) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
     const priceId = subscription.items.data[0].price.id;
-    console.log("Abonnement trouvé avec price_id:", priceId);
     
-    // Rechercher dans la base de données un utilisateur associé à ce client Stripe
-    const { data: users, error: usersError } = await supabaseClient
+    // Update subscription information for the user
+    const { error: updateError } = await supabaseClient
+      .from('stripe_customers')
+      .upsert({
+        id: userId,
+        stripe_customer_id: session.customer,
+        subscription_id: subscription.id,
+        subscription_status: subscription.status,
+        price_id: priceId,
+        cancel_at_period_end: subscription.cancel_at_period_end,
+        updated_at: new Date().toISOString()
+      });
+      
+    if (updateError) {
+      console.error('Error updating subscription information:', updateError);
+    } else {
+      console.log('Subscription successfully linked to user:', userId);
+    }
+  } else {
+    console.log('No subscription found in checkout session');
+  }
+}
+
+// Function to handle checkout.session.completed events
+async function handleCheckoutCompleted(supabaseClient, stripe, session) {
+  // Get the Stripe customer
+  const customerId = session.customer;
+  console.log("Processing checkout for Stripe customer:", customerId);
+  
+  // Retrieve subscription if available
+  if (session.subscription) {
+    const subscription = await stripe.subscriptions.retrieve(session.subscription);
+    const priceId = subscription.items.data[0].price.id;
+    console.log("Subscription found with price_id:", priceId);
+    
+    // Find user associated with this Stripe customer
+    const { data: customerData, error: customerError } = await supabaseClient
       .from('stripe_customers')
       .select('id')
-      .eq('stripe_customer_id', customer)
+      .eq('stripe_customer_id', customerId)
       .maybeSingle();
       
-    if (usersError) {
-      console.error('Erreur lors de la récupération de l\'utilisateur:', usersError);
+    if (customerError) {
+      console.error('Error retrieving customer data:', customerError);
       return;
     }
     
-    if (users) {
-      console.log("Utilisateur trouvé pour le client Stripe:", users.id);
+    if (customerData) {
+      console.log("Found user for Stripe customer:", customerData.id);
       
-      // Mettre à jour les informations d'abonnement
+      // Update subscription information
       const { error: updateError } = await supabaseClient
         .from('stripe_customers')
         .update({
@@ -151,38 +200,39 @@ async function handleCheckoutCompleted(supabaseClient, stripe, session) {
           cancel_at_period_end: subscription.cancel_at_period_end,
           updated_at: new Date().toISOString()
         })
-        .eq('id', users.id);
+        .eq('id', customerData.id);
         
       if (updateError) {
-        console.error('Erreur lors de la mise à jour de l\'abonnement:', updateError);
+        console.error('Error updating subscription:', updateError);
       } else {
-        console.log('Abonnement mis à jour avec succès pour l\'utilisateur:', users.id);
+        console.log('Subscription updated successfully for user:', customerData.id);
       }
     } else {
-      console.log('Aucun utilisateur trouvé pour le client Stripe:', customer);
-      // Rechercher l'utilisateur via le client Stripe
+      console.log('No user found for Stripe customer ID:', customerId);
+      
+      // Try to match by email
       try {
-        const stripeCustomer = await stripe.customers.retrieve(customer);
+        const stripeCustomer = await stripe.customers.retrieve(customerId);
         if (stripeCustomer && stripeCustomer.email) {
-          console.log("Email du client Stripe trouvé:", stripeCustomer.email);
+          console.log("Found email for Stripe customer:", stripeCustomer.email);
           
-          // Rechercher l'utilisateur par email
-          const { data: authUser } = await supabaseClient
+          // Find user by email
+          const { data: authUsers } = await supabaseClient
             .auth
             .admin
             .listUsers();
           
-          const matchingUser = authUser.users.find(u => u.email === stripeCustomer.email);
+          const matchingUser = authUsers.users.find(u => u.email === stripeCustomer.email);
           
           if (matchingUser) {
-            console.log("Utilisateur Supabase trouvé par email:", matchingUser.id);
+            console.log("Found Supabase user by email:", matchingUser.id);
             
-            // Insérer ou mettre à jour les informations du client Stripe
+            // Create or update Stripe customer information
             const { error: upsertError } = await supabaseClient
               .from('stripe_customers')
               .upsert({
                 id: matchingUser.id,
-                stripe_customer_id: customer,
+                stripe_customer_id: customerId,
                 subscription_id: subscription.id,
                 subscription_status: subscription.status,
                 price_id: priceId,
@@ -191,46 +241,48 @@ async function handleCheckoutCompleted(supabaseClient, stripe, session) {
               });
               
             if (upsertError) {
-              console.error('Erreur lors de l\'insertion des données client:', upsertError);
+              console.error('Error recording customer data:', upsertError);
             } else {
-              console.log('Client Stripe créé avec succès pour l\'utilisateur:', matchingUser.id);
+              console.log('Successfully linked Stripe customer to user:', matchingUser.id);
             }
           } else {
-            console.log("Aucun utilisateur trouvé avec l'email:", stripeCustomer.email);
+            console.log("No user found with email:", stripeCustomer.email);
           }
         }
       } catch (stripeError) {
-        console.error("Erreur lors de la récupération du client Stripe:", stripeError);
+        console.error("Error retrieving Stripe customer:", stripeError);
       }
     }
+  } else {
+    console.log("No subscription found in checkout session");
   }
 }
 
-// Fonction pour gérer les mises à jour d'abonnement
+// Function to handle subscription updates
 async function handleSubscriptionUpdate(supabaseClient, subscription) {
-  // Récupérer l'ID du client Stripe
-  const customer = subscription.customer;
-  console.log("Mise à jour de l'abonnement pour le client:", customer);
+  // Get the Stripe customer ID
+  const customerId = subscription.customer;
+  console.log("Updating subscription for customer:", customerId);
   
-  // Récupérer l'utilisateur associé à ce client Stripe
-  const { data: users, error: usersError } = await supabaseClient
+  // Find user associated with this Stripe customer
+  const { data: customerData, error: customerError } = await supabaseClient
     .from('stripe_customers')
     .select('id')
-    .eq('stripe_customer_id', customer)
+    .eq('stripe_customer_id', customerId)
     .maybeSingle();
     
-  if (usersError) {
-    console.error('Erreur lors de la récupération de l\'utilisateur:', usersError);
+  if (customerError) {
+    console.error('Error retrieving customer data:', customerError);
     return;
   }
   
-  if (users) {
-    console.log("Utilisateur trouvé pour le client Stripe:", users.id);
+  if (customerData) {
+    console.log("Found user for Stripe customer:", customerData.id);
     
-    // Obtenir le premier élément de l'abonnement pour récupérer le price_id
+    // Get price ID from subscription
     const priceId = subscription.items.data[0].price.id;
     
-    // Mettre à jour les informations d'abonnement
+    // Update subscription information
     const { error: updateError } = await supabaseClient
       .from('stripe_customers')
       .update({
@@ -240,14 +292,14 @@ async function handleSubscriptionUpdate(supabaseClient, subscription) {
         cancel_at_period_end: subscription.cancel_at_period_end,
         updated_at: new Date().toISOString()
       })
-      .eq('id', users.id);
+      .eq('id', customerData.id);
       
     if (updateError) {
-      console.error('Erreur lors de la mise à jour de l\'abonnement:', updateError);
+      console.error('Error updating subscription:', updateError);
     } else {
-      console.log('Abonnement mis à jour avec succès pour l\'utilisateur:', users.id);
+      console.log('Subscription updated successfully for user:', customerData.id);
     }
   } else {
-    console.error('Aucun utilisateur trouvé pour le client Stripe:', customer);
+    console.error('No user found for Stripe customer:', customerId);
   }
 }
