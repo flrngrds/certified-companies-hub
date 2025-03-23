@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PricingPlan } from "./PricingPlan";
+import { useEffect, useState } from "react";
 
 const BASIC_FEATURES = [
   "Access to EcoVadis-Certified company database",
@@ -20,7 +21,19 @@ const PREMIUM_FEATURES = [
 
 export const SubscriptionManager = () => {
   const { toast } = useToast();
-  const { currentPlan } = useSubscription();
+  const { currentPlan, isLoading } = useSubscription();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        setUserId(data.session.user.id);
+      }
+    };
+    
+    getUserId();
+  }, []);
 
   const handleSubscribe = async (priceId: string) => {
     try {
@@ -35,13 +48,22 @@ export const SubscriptionManager = () => {
         return;
       }
 
+      console.log(`Initiating checkout for user ${session.user.email} with priceId: ${priceId}`);
+      
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId },
+        body: { 
+          priceId,
+          userId: session.user.id, // Pass the user ID in the request
+        },
       });
 
       if (error) throw error;
+      
       if (data?.url) {
+        console.log("Redirecting to Stripe checkout:", data.url);
         window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
       }
     } catch (error: any) {
       console.error('Error:', error);
@@ -57,7 +79,13 @@ export const SubscriptionManager = () => {
     <div className="space-y-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Current Plan</h3>
-        <p className="text-gray-600">{currentPlan}</p>
+        <p className="text-gray-600">
+          {isLoading ? (
+            <span className="inline-block animate-pulse">Checking subscription status...</span>
+          ) : (
+            currentPlan
+          )}
+        </p>
       </div>
       <div className="grid gap-6 md:grid-cols-3">
         <PricingPlan

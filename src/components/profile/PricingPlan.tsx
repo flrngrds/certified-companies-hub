@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PlanFeatures } from "./PlanFeatures";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PricingPlanProps {
   name: string;
@@ -30,6 +31,7 @@ export const PricingPlan = ({
   onSubscribe,
 }: PricingPlanProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   
   // Normalize plan names for comparison
   const normalizedCurrentPlan = currentPlan?.toLowerCase().trim() || '';
@@ -45,9 +47,19 @@ export const PricingPlan = ({
   const handleSubscribeClick = async () => {
     setIsLoading(true);
     try {
+      console.log(`Subscribing to plan: ${name} with priceId: ${priceId}`);
       await onSubscribe(priceId);
+      toast({
+        title: "Subscription process initiated",
+        description: "You'll be redirected to Stripe to complete your payment",
+      });
     } catch (error) {
       console.error('Subscription error:', error);
+      toast({
+        variant: "destructive",
+        title: "Subscription error",
+        description: error?.message || "Failed to process subscription request. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +67,7 @@ export const PricingPlan = ({
 
   const getButtonText = () => {
     if (isCurrentPlan) return 'Current Plan';
-    if (normalizedCurrentPlan === 'free') return 'Get Started';
+    if (normalizedCurrentPlan === 'free' || normalizedCurrentPlan === 'loading...') return 'Get Started';
     return isUpgrade ? 'Upgrade' : 'Downgrade';
   };
 
@@ -75,7 +87,7 @@ export const PricingPlan = ({
       <Button 
         variant={isCurrentPlan ? "secondary" : "default"}
         className="w-full"
-        disabled={isCurrentPlan || isLoading}
+        disabled={isCurrentPlan || isLoading || currentPlan === "Loading..."}
         onClick={handleSubscribeClick}
       >
         {isLoading ? 'Processing...' : getButtonText()}
