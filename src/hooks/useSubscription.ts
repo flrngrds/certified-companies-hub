@@ -7,6 +7,7 @@ export const useSubscription = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("Loading...");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export const useSubscription = () => {
         // First try to get from stripe_customers table
         const { data, error: dbError } = await supabase
           .from('stripe_customers')
-          .select('subscription_status, price_id')
+          .select('subscription_status, price_id, current_period_end')
           .eq('id', session.user.id)
           .eq('subscription_status', 'active')
           .maybeSingle();
@@ -52,11 +53,30 @@ export const useSubscription = () => {
             default:
               setCurrentPlan('Free');
           }
+
+          // Set subscription end date if available
+          if (data.current_period_end) {
+            const endDate = new Date(data.current_period_end);
+            setSubscriptionEndDate(endDate.toISOString());
+            console.log(`Subscription ends on: ${endDate.toLocaleDateString()}`);
+            
+            // Check if subscription has expired
+            const now = new Date();
+            if (endDate < now) {
+              console.log('Subscription has expired. Status should be updated soon.');
+              toast({
+                title: "Subscription status",
+                description: "Your subscription appears to have expired. It will be updated shortly.",
+                variant: "default",
+              });
+            }
+          }
+          
           setIsLoading(false);
           return;
         }
         
-        // If no active subscription found in the database, check with Stripe directly
+        // If no active subscription found in the database or subscription is expired, check with Stripe directly
         console.log("No active subscription found in database, checking with Stripe...");
         const { data: stripeData, error: stripeError } = await supabase.functions.invoke('check-subscription');
 
@@ -72,6 +92,11 @@ export const useSubscription = () => {
         } else {
           console.log('Stripe subscription check result:', stripeData);
           setCurrentPlan(stripeData?.plan || "Free");
+          
+          if (stripeData?.subscriptionEndDate) {
+            setSubscriptionEndDate(stripeData.subscriptionEndDate);
+            console.log(`Subscription ends on: ${new Date(stripeData.subscriptionEndDate).toLocaleDateString()}`);
+          }
         }
       } catch (error) {
         console.error('Subscription check error:', error);
@@ -107,5 +132,5 @@ export const useSubscription = () => {
     };
   }, []);
 
-  return { currentPlan, isLoading, error };
+  return { currentPlan, isLoading, error, subscriptionEndDate };
 };

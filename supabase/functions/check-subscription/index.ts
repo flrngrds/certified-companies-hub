@@ -1,66 +1,92 @@
 
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
+
+console.log("Hello from check-subscription function!");
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("check-subscription function called");
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2023-10-16',
-    });
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    );
-
+    // Get authentication token from the request headers
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      console.log("No Authorization header");
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(
-        JSON.stringify({ plan: 'Free', error: 'Not authenticated' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Missing or invalid authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user } } = await supabaseClient.auth.getUser(token);
-    
-    if (!user?.id) {
-      console.log("No user found with token");
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false
+      }
+    });
+
+    // Use the token from the Authorization header to authenticate with Supabase
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
       return new Response(
-        JSON.stringify({ plan: 'Free', error: 'User not found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Authentication failed', details: authError }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log(`Checking subscription for user: ${user.email}`);
 
-    // Try to find subscription in our database first
-    const { data: customerData, error: customerError } = await supabaseClient
+    // First, check if there is an active subscription in our database
+    const { data: localSubscription, error: dbError } = await supabase
       .from('stripe_customers')
-      .select('subscription_status, price_id, stripe_customer_id')
+      .select('subscription_status, price_id, current_period_end')
       .eq('id', user.id)
       .eq('subscription_status', 'active')
       .maybeSingle();
 
-    if (customerError) {
-      console.error("Error fetching customer data from database:", customerError);
-    } else if (customerData) {
-      console.log("Found active subscription in database:", customerData);
+    if (dbError) {
+      console.error('Error checking local subscription:', dbError);
+      // Continue to check with Stripe directly
+    } else if (localSubscription?.subscription_status === 'active' && localSubscription?.price_id) {
+      console.log('Found active subscription in database:', localSubscription);
       
+      // Check if subscription has expired based on current_period_end
+      if (localSubscription.current_period_end) {
+        const endDate = new Date(localSubscription.current_period_end);
+        const now = new Date();
+        
+        if (endDate < now) {
+          console.log('Subscription period has ended, but status is still active. Returning Free plan.');
+          return new Response(
+            JSON.stringify({ 
+              plan: 'Free',
+              message: 'Subscription expired' 
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        console.log(`Subscription end date: ${endDate.toISOString()}`);
+      }
+      
+      // Map price_id to plan name
       let plan = 'Free';
-      switch (customerData.price_id) {
+      switch (localSubscription.price_id) {
         case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
           plan = 'Basic';
           break;
@@ -74,113 +100,80 @@ serve(async (req) => {
       
       return new Response(
         JSON.stringify({ 
-          plan,
-          subscriptionStatus: customerData.subscription_status,
-          source: 'database'
+          plan, 
+          message: 'Active subscription found in database',
+          subscriptionEndDate: localSubscription.current_period_end 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // If not found in database, check directly with Stripe
-    console.log("No active subscription found in database, checking with Stripe...");
-    
-    // First try to get customer by stripe_customer_id if available
-    if (customerData?.stripe_customer_id) {
-      console.log("Checking subscription for Stripe customer:", customerData.stripe_customer_id);
-      
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customerData.stripe_customer_id,
-        status: 'active',
-        limit: 1
-      });
-      
-      if (subscriptions.data.length > 0) {
-        const subscription = subscriptions.data[0];
-        const priceId = subscription.items.data[0].price.id;
-        
-        let plan = 'Free';
-        switch (priceId) {
-          case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
-            plan = 'Basic';
-            break;
-          case 'price_1QGMsMG4TGR1Qn6retfbREsl':
-            plan = 'Premium';
-            break;
-          case 'price_1QGMsvG4TGR1Qn6rghOqEU8H':
-            plan = 'Enterprise';
-            break;
-        }
-        
-        // Update our database with the current status
-        await supabaseClient
-          .from('stripe_customers')
-          .update({
-            subscription_status: 'active',
-            price_id: priceId,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-        
-        return new Response(
-          JSON.stringify({ 
-            plan,
-            subscriptionStatus: 'active',
-            source: 'stripe'
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    // If no active subscription is found in our database or it might be expired, check with Stripe directly
+    console.log('No active subscription found in database, checking with Stripe API...');
+
+    // Initialize Stripe with the secret key
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
     }
     
-    // Try to find customer by email
-    console.log("Looking up Stripe customer by email:", user.email);
-    const customers = await stripe.customers.list({
-      email: user.email,
-      limit: 1
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2023-10-16',
     });
 
-    if (customers.data.length === 0) {
-      console.log("No Stripe customer found with email:", user.email);
+    // Get the Stripe customer for this user
+    const { data: stripeCustomer, error: customerError } = await supabase
+      .from('stripe_customers')
+      .select('stripe_customer_id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (customerError) {
+      console.error('Error retrieving Stripe customer ID:', customerError);
       return new Response(
-        JSON.stringify({ plan: 'Free', source: 'stripe-no-customer' }),
+        JSON.stringify({ plan: 'Free', message: 'Error retrieving customer data' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const stripeCustomerId = customers.data[0].id;
-    console.log("Found Stripe customer:", stripeCustomerId);
+    if (!stripeCustomer?.stripe_customer_id) {
+      console.log('No Stripe customer ID found for user');
+      return new Response(
+        JSON.stringify({ plan: 'Free', message: 'No Stripe customer found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
+    console.log(`Checking Stripe subscriptions for customer: ${stripeCustomer.stripe_customer_id}`);
+
+    // Get active subscriptions for this customer
     const subscriptions = await stripe.subscriptions.list({
-      customer: stripeCustomerId,
+      customer: stripeCustomer.stripe_customer_id,
       status: 'active',
-      limit: 10 // Get all active subscriptions to find the right one
+      expand: ['data.items.data.price']
     });
-
-    console.log(`Found ${subscriptions.data.length} active subscriptions for customer`);
 
     if (subscriptions.data.length === 0) {
-      // Update our database to clear any stale subscription data
-      await supabaseClient
-        .from('stripe_customers')
-        .update({
-          subscription_status: 'inactive',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-        
+      console.log('No active Stripe subscriptions found');
       return new Response(
-        JSON.stringify({ plan: 'Free', source: 'stripe-no-subscription' }),
+        JSON.stringify({ plan: 'Free', message: 'No active subscriptions' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get the most recent subscription
-    const subscription = subscriptions.data[0];
-    const priceId = subscription.items.data[0].price.id;
+    // Use the most recent subscription
+    const latestSubscription = subscriptions.data[0];
+    const priceId = latestSubscription.items.data[0].price.id;
     
+    // Get the end date of the subscription period
+    const endDate = latestSubscription.current_period_end 
+      ? new Date(latestSubscription.current_period_end * 1000).toISOString() 
+      : null;
+      
     console.log(`Active subscription found with price ID: ${priceId}`);
-
+    console.log(`Subscription end date: ${endDate}`);
+    
+    // Map price ID to plan name
     let plan = 'Free';
     switch (priceId) {
       case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
@@ -194,34 +187,39 @@ serve(async (req) => {
         break;
     }
 
-    // Update our database with the current status
-    await supabaseClient
+    // Update our database with the latest subscription info
+    const { error: updateError } = await supabase
       .from('stripe_customers')
-      .upsert({
-        id: user.id,
-        stripe_customer_id: stripeCustomerId,
-        subscription_id: subscription.id,
-        subscription_status: 'active',
+      .update({
+        subscription_id: latestSubscription.id,
+        subscription_status: latestSubscription.status,
         price_id: priceId,
+        cancel_at_period_end: latestSubscription.cancel_at_period_end,
+        current_period_end: endDate,
         updated_at: new Date().toISOString()
-      });
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error updating subscription in database:', updateError);
+    } else {
+      console.log('Successfully updated subscription in database');
+    }
 
     return new Response(
       JSON.stringify({ 
         plan, 
-        subscriptionStatus: 'active',
-        source: 'stripe-updated'
+        message: 'Active subscription found in Stripe',
+        subscriptionEndDate: endDate
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+
   } catch (error) {
     console.error('Error checking subscription:', error);
     return new Response(
-      JSON.stringify({ plan: 'Free', error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200, // Return 200 even on error to avoid breaking the UI
-      }
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

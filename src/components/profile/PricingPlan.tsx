@@ -12,6 +12,7 @@ interface PricingPlanProps {
   features: string[];
   currentPlan: string;
   priceId: string;
+  subscriptionEndDate?: string | null;
   badge?: {
     text: string;
     color: string;
@@ -27,6 +28,7 @@ export const PricingPlan = ({
   features,
   currentPlan,
   priceId,
+  subscriptionEndDate,
   badge,
   onSubscribe,
 }: PricingPlanProps) => {
@@ -43,6 +45,24 @@ export const PricingPlan = ({
   const currentPlanIndex = planOrder.indexOf(normalizedCurrentPlan);
   const newPlanIndex = planOrder.indexOf(normalizedName);
   const isUpgrade = newPlanIndex > currentPlanIndex;
+  
+  // Format subscription end date for display
+  const formatEndDate = (dateString?: string | null) => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
+  };
+  
+  const formattedEndDate = formatEndDate(subscriptionEndDate);
   
   const handleSubscribeClick = async () => {
     setIsLoading(true);
@@ -99,6 +119,11 @@ export const PricingPlan = ({
       {isCurrentPlan && (
         <div className="mt-4 bg-primary/10 p-3 rounded-md text-sm">
           <p className="font-medium text-primary">Your active plan</p>
+          {formattedEndDate && (
+            <p className="text-sm text-gray-600 mt-1">
+              Renews on: {formattedEndDate}
+            </p>
+          )}
         </div>
       )}
     </Card>

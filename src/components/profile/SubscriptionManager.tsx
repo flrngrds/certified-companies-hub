@@ -21,7 +21,7 @@ const PREMIUM_FEATURES = [
 
 export const SubscriptionManager = () => {
   const { toast } = useToast();
-  const { currentPlan, isLoading } = useSubscription();
+  const { currentPlan, isLoading, subscriptionEndDate } = useSubscription();
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -75,15 +75,24 @@ export const SubscriptionManager = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-pulse text-gray-500">Checking subscription status...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Current Plan</h3>
         <p className="text-gray-600">
-          {isLoading ? (
-            <span className="inline-block animate-pulse">Checking subscription status...</span>
-          ) : (
-            currentPlan
+          {currentPlan}
+          {subscriptionEndDate && currentPlan !== "Free" && (
+            <span className="ml-2 text-sm text-gray-500">
+              (Renews: {new Date(subscriptionEndDate).toLocaleDateString()})
+            </span>
           )}
         </p>
       </div>
@@ -95,6 +104,7 @@ export const SubscriptionManager = () => {
           features={BASIC_FEATURES}
           currentPlan={currentPlan}
           priceId="price_1QGMpIG4TGR1Qn6rUc16QbuT"
+          subscriptionEndDate={currentPlan === "Basic" ? subscriptionEndDate : null}
           onSubscribe={handleSubscribe}
         />
         <PricingPlan
@@ -104,6 +114,7 @@ export const SubscriptionManager = () => {
           features={PREMIUM_FEATURES}
           currentPlan={currentPlan}
           priceId="price_1QGMsMG4TGR1Qn6retfbREsl"
+          subscriptionEndDate={currentPlan === "Premium" ? subscriptionEndDate : null}
           badge={{
             text: "Most Popular",
             color: "bg-orange-400",
@@ -118,6 +129,7 @@ export const SubscriptionManager = () => {
           features={PREMIUM_FEATURES}
           currentPlan={currentPlan}
           priceId="price_1QGMsvG4TGR1Qn6rghOqEU8H"
+          subscriptionEndDate={currentPlan === "Enterprise" ? subscriptionEndDate : null}
           badge={{
             text: "Best Deal",
             color: "bg-blue-900",

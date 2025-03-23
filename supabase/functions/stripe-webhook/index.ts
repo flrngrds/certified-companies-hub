@@ -137,6 +137,54 @@ serve(async (req) => {
   }
 });
 
+// Utility function to check if a subscription has expired
+async function checkSubscriptionExpiration(supabaseClient) {
+  try {
+    console.log('Checking for expired subscriptions');
+    
+    const now = new Date().toISOString();
+    
+    // Find all active subscriptions that have expired
+    const { data: expiredSubscriptions, error } = await supabaseClient
+      .from('stripe_customers')
+      .select('id, subscription_id')
+      .eq('subscription_status', 'active')
+      .lt('current_period_end', now);
+      
+    if (error) {
+      console.error('Error checking for expired subscriptions:', error);
+      return;
+    }
+    
+    if (expiredSubscriptions && expiredSubscriptions.length > 0) {
+      console.log(`Found ${expiredSubscriptions.length} expired subscriptions to update`);
+      
+      // Update each expired subscription
+      for (const sub of expiredSubscriptions) {
+        console.log(`Marking subscription ${sub.subscription_id} as inactive due to expiration`);
+        
+        const { error: updateError } = await supabaseClient
+          .from('stripe_customers')
+          .update({
+            subscription_status: 'inactive',
+            updated_at: now
+          })
+          .eq('id', sub.id);
+          
+        if (updateError) {
+          console.error(`Error updating expired subscription ${sub.subscription_id}:`, updateError);
+        } else {
+          console.log(`Successfully marked subscription ${sub.subscription_id} as inactive`);
+        }
+      }
+    } else {
+      console.log('No expired subscriptions found');
+    }
+  } catch (err) {
+    console.error('Error in checkSubscriptionExpiration:', err);
+  }
+}
+
 // New function to cancel existing subscriptions
 async function cancelExistingSubscriptions(supabaseClient, stripe, userId) {
   try {
@@ -201,8 +249,9 @@ async function handleCheckoutWithUserId(supabaseClient, stripe, session, userId)
     const priceId = subscription.items.data[0].price.id;
     
     console.log(`Subscription details - ID: ${subscription.id}, Status: ${subscription.status}, PriceID: ${priceId}`);
+    console.log(`Current period end: ${new Date(subscription.current_period_end * 1000).toISOString()}`);
     
-    // Update subscription information for the user
+    // Update subscription information for the user with current_period_end
     const { error: updateError } = await supabaseClient
       .from('stripe_customers')
       .upsert({
@@ -212,6 +261,7 @@ async function handleCheckoutWithUserId(supabaseClient, stripe, session, userId)
         subscription_status: subscription.status,
         price_id: priceId,
         cancel_at_period_end: subscription.cancel_at_period_end,
+        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         updated_at: new Date().toISOString()
       });
       
@@ -236,6 +286,7 @@ async function handleCheckoutCompleted(supabaseClient, stripe, session) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
     const priceId = subscription.items.data[0].price.id;
     console.log("Subscription found with price_id:", priceId);
+    console.log(`Current period end: ${new Date(subscription.current_period_end * 1000).toISOString()}`);
     
     // Find user associated with this Stripe customer
     const { data: customerData, error: customerError } = await supabaseClient
@@ -263,6 +314,7 @@ async function handleCheckoutCompleted(supabaseClient, stripe, session) {
           subscription_status: subscription.status,
           price_id: priceId,
           cancel_at_period_end: subscription.cancel_at_period_end,
+          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('id', customerData.id);
@@ -310,6 +362,7 @@ async function handleCheckoutCompleted(supabaseClient, stripe, session) {
                 subscription_status: subscription.status,
                 price_id: priceId,
                 cancel_at_period_end: subscription.cancel_at_period_end,
+                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
                 updated_at: new Date().toISOString()
               });
               
@@ -337,6 +390,15 @@ async function handleSubscriptionUpdate(supabaseClient, stripe, subscription) {
   const customerId = subscription.customer;
   console.log("Updating subscription for customer:", customerId);
   
+  // Log the current period end timestamp
+  if (subscription.current_period_end) {
+    const endDate = new Date(subscription.current_period_end * 1000);
+    console.log(`Subscription period ends: ${endDate.toISOString()}`);
+  }
+  
+  // Run expiration check to update any expired subscriptions
+  await checkSubscriptionExpiration(supabaseClient);
+  
   // Find user associated with this Stripe customer
   const { data: customerData, error: customerError } = await supabaseClient
     .from('stripe_customers')
@@ -358,7 +420,7 @@ async function handleSubscriptionUpdate(supabaseClient, stripe, subscription) {
     for (const customer of customerData) {
       console.log(`Updating subscription for user: ${customer.id}`);
       
-      // Update subscription information
+      // Update subscription information with current_period_end
       const { error: updateError } = await supabaseClient
         .from('stripe_customers')
         .update({
@@ -366,6 +428,8 @@ async function handleSubscriptionUpdate(supabaseClient, stripe, subscription) {
           subscription_status: subscription.status,
           price_id: subscription.status === 'active' ? priceId : null,
           cancel_at_period_end: subscription.cancel_at_period_end,
+          current_period_end: subscription.current_period_end ? 
+            new Date(subscription.current_period_end * 1000).toISOString() : null,
           updated_at: new Date().toISOString()
         })
         .eq('id', customer.id)
@@ -404,7 +468,7 @@ async function handleSubscriptionUpdate(supabaseClient, stripe, subscription) {
           // Get price ID from subscription
           const priceId = subscription.items.data[0].price.id;
           
-          // Update subscription information
+          // Update subscription information with current_period_end
           const { error: upsertError } = await supabaseClient
             .from('stripe_customers')
             .upsert({
@@ -414,6 +478,8 @@ async function handleSubscriptionUpdate(supabaseClient, stripe, subscription) {
               subscription_status: subscription.status,
               price_id: subscription.status === 'active' ? priceId : null,
               cancel_at_period_end: subscription.cancel_at_period_end,
+              current_period_end: subscription.current_period_end ? 
+                new Date(subscription.current_period_end * 1000).toISOString() : null,
               updated_at: new Date().toISOString()
             });
             
@@ -431,3 +497,9 @@ async function handleSubscriptionUpdate(supabaseClient, stripe, subscription) {
     }
   }
 }
+
+// Call the expiration check when the webhook runs
+checkSubscriptionExpiration(createClient(
+  Deno.env.get('SUPABASE_URL') || '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+)).catch(err => console.error('Error in expiration check:', err));
