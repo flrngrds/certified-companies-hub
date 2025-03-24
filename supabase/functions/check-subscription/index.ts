@@ -20,8 +20,9 @@ serve(async (req) => {
     // Get authentication token from the request headers
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid authorization header');
       return new Response(
-        JSON.stringify({ error: 'Missing or invalid authorization header' }),
+        JSON.stringify({ error: 'Missing or invalid authorization header', plan: 'Free' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -44,7 +45,7 @@ serve(async (req) => {
     if (authError || !user) {
       console.error('Authentication error:', authError);
       return new Response(
-        JSON.stringify({ error: 'Authentication failed', details: authError }),
+        JSON.stringify({ error: 'Authentication failed', details: authError, plan: 'Free' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -58,6 +59,8 @@ serve(async (req) => {
       .eq('id', user.id)
       .eq('subscription_status', 'active')
       .maybeSingle();
+
+    console.log('Database query result:', { data: localSubscription, error: dbError });
 
     if (dbError) {
       console.error('Error checking local subscription:', dbError);
@@ -128,6 +131,8 @@ serve(async (req) => {
       .eq('id', user.id)
       .maybeSingle();
 
+    console.log('Stripe customer query result:', { data: stripeCustomer, error: customerError });
+
     if (customerError) {
       console.error('Error retrieving Stripe customer ID:', customerError);
       return new Response(
@@ -152,6 +157,8 @@ serve(async (req) => {
       status: 'active',
       expand: ['data.items.data.price']
     });
+
+    console.log(`Found ${subscriptions.data.length} active subscriptions in Stripe`);
 
     if (subscriptions.data.length === 0) {
       console.log('No active Stripe subscriptions found');

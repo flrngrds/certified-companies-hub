@@ -17,6 +17,7 @@ export const useSubscription = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session?.user?.id) {
+          console.log("No authenticated user found, setting plan to Free");
           setCurrentPlan("Free");
           setIsLoading(false);
           return;
@@ -30,13 +31,17 @@ export const useSubscription = () => {
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
           .maybeSingle();
+
+        console.log("Database subscription query result:", { data: subscriptionData, error: subscriptionError });
         
-        // Get end date in a separate query to handle potential schema inconsistencies
+        // Get end date in a separate query
         const { data: endDateData, error: endDateError } = await supabase
           .from('stripe_customers')
           .select('current_period_end')
           .eq('id', session.user.id)
           .maybeSingle();
+        
+        console.log("Database end date query result:", { data: endDateData, error: endDateError });
 
         if (subscriptionError) {
           console.error('Error fetching subscription data:', subscriptionError);
@@ -46,7 +51,7 @@ export const useSubscription = () => {
           console.error('Error fetching end date data:', endDateError);
         }
 
-        // Check if we have valid subscription data from the database
+        // Check if we have valid subscription data and it's active
         if (subscriptionData && subscriptionData.subscription_status === 'active' && subscriptionData.price_id) {
           console.log('Found active subscription in database:', subscriptionData);
           
@@ -62,11 +67,12 @@ export const useSubscription = () => {
               setCurrentPlan('Enterprise');
               break;
             default:
+              console.warn('Unknown price_id in database:', subscriptionData.price_id);
               setCurrentPlan('Free');
           }
 
           // Set subscription end date if available
-          if (endDateData?.current_period_end) {
+          if (endDateData && endDateData.current_period_end) {
             const endDate = new Date(endDateData.current_period_end);
             setSubscriptionEndDate(endDate.toISOString());
             console.log(`Subscription ends on: ${endDate.toLocaleDateString()}`);
@@ -87,9 +93,13 @@ export const useSubscription = () => {
           return;
         }
         
+        console.log("No active subscription found in database or issue with data, checking with Stripe API directly");
+        
         // If no active subscription found in the database or there was an error, check with Stripe directly
-        console.log("No active subscription found in database or error occurred, checking with Stripe...");
+        console.log("Calling check-subscription edge function with auth token...");
         const { data: stripeData, error: stripeError } = await supabase.functions.invoke('check-subscription');
+
+        console.log("Edge function response:", { data: stripeData, error: stripeError });
 
         if (stripeError) {
           console.error('Error checking subscription with Stripe:', stripeError);
@@ -105,6 +115,7 @@ export const useSubscription = () => {
           
           // Ensure we have valid data from the Stripe check
           if (stripeData?.plan) {
+            console.log(`Setting current plan to: ${stripeData.plan}`);
             setCurrentPlan(stripeData.plan);
           } else {
             console.log('No plan data returned from Stripe, defaulting to Free');
