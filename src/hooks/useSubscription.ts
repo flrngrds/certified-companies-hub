@@ -8,6 +8,7 @@ export const useSubscription = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,16 +24,21 @@ export const useSubscription = () => {
           return;
         }
 
-        console.log("Checking subscription for user:", session.user.email);
+        setUserEmail(session.user.email);
+        console.log("Checking subscription for user:", session.user.email, "with ID:", session.user.id);
 
         // First try to get subscription data from stripe_customers table
         const { data: subscriptionData, error: subscriptionError } = await supabase
           .from('stripe_customers')
-          .select('subscription_status, price_id')
+          .select('subscription_status, price_id, stripe_customer_id')
           .eq('id', session.user.id)
           .maybeSingle();
 
-        console.log("Database subscription query result:", { data: subscriptionData, error: subscriptionError });
+        console.log("Database subscription query result:", { 
+          data: subscriptionData, 
+          error: subscriptionError,
+          userId: session.user.id
+        });
         
         // Get end date in a separate query
         const { data: endDateData, error: endDateError } = await supabase
@@ -52,24 +58,31 @@ export const useSubscription = () => {
         }
 
         // Check if we have valid subscription data and it's active
-        if (subscriptionData && subscriptionData.subscription_status === 'active' && subscriptionData.price_id) {
+        if (subscriptionData && 
+            subscriptionData.subscription_status === 'active' && 
+            subscriptionData.price_id) {
           console.log('Found active subscription in database:', subscriptionData);
           
           // Map price_id to plan name
           switch (subscriptionData.price_id) {
             case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
+              console.log('Setting plan to Basic from price_id');
               setCurrentPlan('Basic');
               break;
             case 'price_1QGMsMG4TGR1Qn6retfbREsl':
+              console.log('Setting plan to Premium from price_id');
               setCurrentPlan('Premium');
               break;
             case 'price_1QGMsvG4TGR1Qn6rghOqEU8H':
+              console.log('Setting plan to Enterprise from price_id');
               setCurrentPlan('Enterprise');
               break;
             default:
               console.warn('Unknown price_id in database:', subscriptionData.price_id);
               setCurrentPlan('Free');
           }
+
+          console.log(`Stripe customer ID from database: ${subscriptionData.stripe_customer_id}`);
 
           // Set subscription end date if available
           if (endDateData && endDateData.current_period_end) {
@@ -97,7 +110,9 @@ export const useSubscription = () => {
         
         // If no active subscription found in the database or there was an error, check with Stripe directly
         console.log("Calling check-subscription edge function with auth token...");
-        const { data: stripeData, error: stripeError } = await supabase.functions.invoke('check-subscription');
+        const { data: stripeData, error: stripeError } = await supabase.functions.invoke('check-subscription', {
+          body: { userId: session.user.id, userEmail: session.user.email }
+        });
 
         console.log("Edge function response:", { data: stripeData, error: stripeError });
 
@@ -161,5 +176,5 @@ export const useSubscription = () => {
     };
   }, []);
 
-  return { currentPlan, isLoading, error, subscriptionEndDate };
+  return { currentPlan, isLoading, error, subscriptionEndDate, userEmail };
 };

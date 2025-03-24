@@ -27,6 +27,19 @@ serve(async (req) => {
       );
     }
 
+    // Parse the request body to get additional data
+    let userId = null;
+    let userEmail = null;
+    
+    try {
+      const requestData = await req.json();
+      userId = requestData.userId;
+      userEmail = requestData.userEmail;
+      console.log(`Additional data from request: userId=${userId}, userEmail=${userEmail}`);
+    } catch (e) {
+      console.log("No additional data in request body or parsing error:", e);
+    }
+
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
@@ -50,69 +63,90 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Checking subscription for user: ${user.email}`);
+    // If userId wasn't provided in the request, use the authenticated user's ID
+    if (!userId) {
+      userId = user.id;
+    }
+    
+    // If userEmail wasn't provided in the request, use the authenticated user's email
+    if (!userEmail) {
+      userEmail = user.email;
+    }
+
+    console.log(`Checking subscription for user: ${userEmail} with ID: ${userId}`);
 
     // First, check if there is an active subscription in our database
     const { data: localSubscription, error: dbError } = await supabase
       .from('stripe_customers')
-      .select('subscription_status, price_id, current_period_end')
-      .eq('id', user.id)
-      .eq('subscription_status', 'active')
+      .select('subscription_status, price_id, current_period_end, stripe_customer_id')
+      .eq('id', userId)
       .maybeSingle();
 
-    console.log('Database query result:', { data: localSubscription, error: dbError });
+    console.log('Database query result:', { 
+      data: localSubscription, 
+      error: dbError,
+      userId: userId
+    });
 
     if (dbError) {
       console.error('Error checking local subscription:', dbError);
       // Continue to check with Stripe directly
-    } else if (localSubscription && localSubscription.subscription_status === 'active' && localSubscription.price_id) {
-      console.log('Found active subscription in database:', localSubscription);
+    } else if (localSubscription) {
+      console.log('Found subscription in database:', localSubscription);
       
-      // Check if subscription has expired based on current_period_end
-      if (localSubscription.current_period_end) {
-        const endDate = new Date(localSubscription.current_period_end);
-        const now = new Date();
+      // Even if it's not marked as active, let's inspect it
+      console.log(`Subscription status: ${localSubscription.subscription_status}`);
+      console.log(`Price ID: ${localSubscription.price_id}`);
+      console.log(`Stripe customer ID: ${localSubscription.stripe_customer_id}`);
+
+      // If it's active and has a price_id, we can return the plan
+      if (localSubscription.subscription_status === 'active' && localSubscription.price_id) {
+        console.log('Active subscription found in database with valid price_id');
         
-        if (endDate < now) {
-          console.log('Subscription period has ended, but status is still active. Returning Free plan.');
-          return new Response(
-            JSON.stringify({ 
-              plan: 'Free',
-              message: 'Subscription expired' 
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+        // Check if subscription has expired based on current_period_end
+        if (localSubscription.current_period_end) {
+          const endDate = new Date(localSubscription.current_period_end);
+          const now = new Date();
+          
+          if (endDate < now) {
+            console.log('Subscription period has ended, but status is still active. Continuing to check with Stripe.');
+            // Continue to Stripe check rather than immediately returning Free
+          } else {
+            console.log(`Subscription end date: ${endDate.toISOString()} is valid (future date)`);
+            
+            // Map price_id to plan name
+            let plan = 'Free';
+            switch (localSubscription.price_id) {
+              case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
+                plan = 'Basic';
+                break;
+              case 'price_1QGMsMG4TGR1Qn6retfbREsl':
+                plan = 'Premium';
+                break;
+              case 'price_1QGMsvG4TGR1Qn6rghOqEU8H':
+                plan = 'Enterprise';
+                break;
+            }
+            
+            console.log(`Returning plan: ${plan} based on database record`);
+            return new Response(
+              JSON.stringify({ 
+                plan, 
+                message: 'Active subscription found in database',
+                subscriptionEndDate: localSubscription.current_period_end,
+                stripeCustomerId: localSubscription.stripe_customer_id
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        } else {
+          console.log('No current_period_end found in active subscription, continuing to check with Stripe');
         }
-        
-        console.log(`Subscription end date: ${endDate.toISOString()}`);
       }
-      
-      // Map price_id to plan name
-      let plan = 'Free';
-      switch (localSubscription.price_id) {
-        case 'price_1QGMpIG4TGR1Qn6rUc16QbuT':
-          plan = 'Basic';
-          break;
-        case 'price_1QGMsMG4TGR1Qn6retfbREsl':
-          plan = 'Premium';
-          break;
-        case 'price_1QGMsvG4TGR1Qn6rghOqEU8H':
-          plan = 'Enterprise';
-          break;
-      }
-      
-      return new Response(
-        JSON.stringify({ 
-          plan, 
-          message: 'Active subscription found in database',
-          subscriptionEndDate: localSubscription.current_period_end 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     // If no active subscription is found in our database or it might be expired, check with Stripe directly
-    console.log('No active subscription found in database, checking with Stripe API...');
+    console.log('Checking with Stripe API...');
 
     // Initialize Stripe with the secret key
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
@@ -124,24 +158,42 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    // Get the Stripe customer for this user
-    const { data: stripeCustomer, error: customerError } = await supabase
-      .from('stripe_customers')
-      .select('stripe_customer_id')
-      .eq('id', user.id)
-      .maybeSingle();
+    // First, try to find a Stripe customer by email if we have one
+    let stripeCustomerId = null;
+    
+    if (userEmail) {
+      console.log(`Looking for Stripe customer with email: ${userEmail}`);
+      const customers = await stripe.customers.list({
+        email: userEmail,
+        limit: 1
+      });
+      
+      if (customers.data.length > 0) {
+        stripeCustomerId = customers.data[0].id;
+        console.log(`Found Stripe customer by email: ${stripeCustomerId}`);
+      }
+    }
+    
+    // If we didn't find a customer by email, try the database lookup
+    if (!stripeCustomerId) {
+      // Get the Stripe customer for this user from our database
+      const { data: stripeCustomer, error: customerError } = await supabase
+        .from('stripe_customers')
+        .select('stripe_customer_id')
+        .eq('id', userId)
+        .maybeSingle();
 
-    console.log('Stripe customer query result:', { data: stripeCustomer, error: customerError });
+      console.log('Stripe customer query result:', { data: stripeCustomer, error: customerError });
 
-    if (customerError) {
-      console.error('Error retrieving Stripe customer ID:', customerError);
-      return new Response(
-        JSON.stringify({ plan: 'Free', message: 'Error retrieving customer data' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (customerError) {
+        console.error('Error retrieving Stripe customer ID:', customerError);
+      } else if (stripeCustomer?.stripe_customer_id) {
+        stripeCustomerId = stripeCustomer.stripe_customer_id;
+        console.log(`Using Stripe customer ID from database: ${stripeCustomerId}`);
+      }
     }
 
-    if (!stripeCustomer?.stripe_customer_id) {
+    if (!stripeCustomerId) {
       console.log('No Stripe customer ID found for user');
       return new Response(
         JSON.stringify({ plan: 'Free', message: 'No Stripe customer found' }),
@@ -149,11 +201,11 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Checking Stripe subscriptions for customer: ${stripeCustomer.stripe_customer_id}`);
+    console.log(`Checking Stripe subscriptions for customer: ${stripeCustomerId}`);
 
     // Get active subscriptions for this customer
     const subscriptions = await stripe.subscriptions.list({
-      customer: stripeCustomer.stripe_customer_id,
+      customer: stripeCustomerId,
       status: 'active',
       expand: ['data.items.data.price']
     });
@@ -162,6 +214,21 @@ serve(async (req) => {
 
     if (subscriptions.data.length === 0) {
       console.log('No active Stripe subscriptions found');
+      
+      // Check for inactive subscriptions too, for debugging
+      const inactiveSubscriptions = await stripe.subscriptions.list({
+        customer: stripeCustomerId,
+        status: 'all',
+        expand: ['data.items.data.price']
+      });
+      
+      console.log(`Found ${inactiveSubscriptions.data.length} total subscriptions (including inactive) in Stripe`);
+      if (inactiveSubscriptions.data.length > 0) {
+        inactiveSubscriptions.data.forEach(sub => {
+          console.log(`Subscription ${sub.id} has status: ${sub.status}`);
+        });
+      }
+      
       return new Response(
         JSON.stringify({ plan: 'Free', message: 'No active subscriptions' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -197,15 +264,16 @@ serve(async (req) => {
     // Update our database with the latest subscription info
     const { error: updateError } = await supabase
       .from('stripe_customers')
-      .update({
+      .upsert({
+        id: userId,
+        stripe_customer_id: stripeCustomerId,
         subscription_id: latestSubscription.id,
         subscription_status: latestSubscription.status,
         price_id: priceId,
         cancel_at_period_end: latestSubscription.cancel_at_period_end,
         current_period_end: endDate,
         updated_at: new Date().toISOString()
-      })
-      .eq('id', user.id);
+      });
 
     if (updateError) {
       console.error('Error updating subscription in database:', updateError);
@@ -217,7 +285,8 @@ serve(async (req) => {
       JSON.stringify({ 
         plan, 
         message: 'Active subscription found in Stripe',
-        subscriptionEndDate: endDate
+        subscriptionEndDate: endDate,
+        stripeCustomerId
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

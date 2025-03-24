@@ -21,7 +21,7 @@ const PREMIUM_FEATURES = [
 
 export const SubscriptionManager = () => {
   const { toast } = useToast();
-  const { currentPlan, isLoading, subscriptionEndDate } = useSubscription();
+  const { currentPlan, isLoading, subscriptionEndDate, userEmail } = useSubscription();
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,6 +95,12 @@ export const SubscriptionManager = () => {
             </span>
           )}
         </p>
+        {userEmail && (
+          <p className="text-xs text-gray-500 mt-1">User: {userEmail}</p>
+        )}
+        {userId && (
+          <p className="text-xs text-gray-500">ID: {userId}</p>
+        )}
       </div>
       <div className="grid gap-6 md:grid-cols-3">
         <PricingPlan
