@@ -62,7 +62,7 @@ serve(async (req) => {
     if (dbError) {
       console.error('Error checking local subscription:', dbError);
       // Continue to check with Stripe directly
-    } else if (localSubscription?.subscription_status === 'active' && localSubscription?.price_id) {
+    } else if (localSubscription && localSubscription.subscription_status === 'active' && localSubscription.price_id) {
       console.log('Found active subscription in database:', localSubscription);
       
       // Check if subscription has expired based on current_period_end
@@ -218,7 +218,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error checking subscription:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, plan: 'Free' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

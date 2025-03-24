@@ -29,23 +29,25 @@ export const useSubscription = () => {
           .from('stripe_customers')
           .select('subscription_status, price_id')
           .eq('id', session.user.id)
-          .eq('subscription_status', 'active')
           .maybeSingle();
-
-        // Try to get current_period_end separately to handle potential DB schema inconsistencies
+        
+        // Get end date in a separate query to handle potential schema inconsistencies
         const { data: endDateData, error: endDateError } = await supabase
           .from('stripe_customers')
           .select('current_period_end')
           .eq('id', session.user.id)
-          .eq('subscription_status', 'active')
           .maybeSingle();
 
         if (subscriptionError) {
           console.error('Error fetching subscription data:', subscriptionError);
-          // Continue to check with Stripe directly
         }
 
-        if (subscriptionData?.subscription_status === 'active' && subscriptionData?.price_id) {
+        if (endDateError) {
+          console.error('Error fetching end date data:', endDateError);
+        }
+
+        // Check if we have valid subscription data from the database
+        if (subscriptionData && subscriptionData.subscription_status === 'active' && subscriptionData.price_id) {
           console.log('Found active subscription in database:', subscriptionData);
           
           // Map price_id to plan name
@@ -85,8 +87,8 @@ export const useSubscription = () => {
           return;
         }
         
-        // If no active subscription found in the database or subscription is expired, check with Stripe directly
-        console.log("No active subscription found in database, checking with Stripe...");
+        // If no active subscription found in the database or there was an error, check with Stripe directly
+        console.log("No active subscription found in database or error occurred, checking with Stripe...");
         const { data: stripeData, error: stripeError } = await supabase.functions.invoke('check-subscription');
 
         if (stripeError) {
@@ -100,7 +102,14 @@ export const useSubscription = () => {
           });
         } else {
           console.log('Stripe subscription check result:', stripeData);
-          setCurrentPlan(stripeData?.plan || "Free");
+          
+          // Ensure we have valid data from the Stripe check
+          if (stripeData?.plan) {
+            setCurrentPlan(stripeData.plan);
+          } else {
+            console.log('No plan data returned from Stripe, defaulting to Free');
+            setCurrentPlan("Free");
+          }
           
           if (stripeData?.subscriptionEndDate) {
             setSubscriptionEndDate(stripeData.subscriptionEndDate);
