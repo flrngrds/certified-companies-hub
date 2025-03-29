@@ -28,8 +28,8 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       // For debugging - log each company with its verification date
       companies.forEach(company => {
         const companyName = isEcoVadisCertified 
-          ? company.Entreprise || "Unknown"
-          : company.Company || "Unknown";
+          ? (company as any).Entreprise || "Unknown"
+          : (company as any).Company || "Unknown";
         
         const verifiedDate = company["Last verified"];
         const parsedDate = parseDate(verifiedDate);
@@ -63,7 +63,7 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
 
       // Additional debugging - log companies after sorting
       console.log("Companies after sorting by Last verified:", companies.map(c => ({
-        name: isEcoVadisCertified ? c.Entreprise || "Unknown" : c.Company || "Unknown",
+        name: isEcoVadisCertified ? (c as any).Entreprise || "Unknown" : (c as any).Company || "Unknown",
         lastVerified: c["Last verified"],
         parsedDate: parseDate(c["Last verified"])
       })));
@@ -71,7 +71,7 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       // Get the top 3 companies after sorting
       const latestCompanies = companies.slice(0, 3);
       console.log("Latest 3 companies after sorting by Last verified:", latestCompanies.map(c => ({
-        name: isEcoVadisCertified ? c.Entreprise || "Unknown" : c.Company || "Unknown",
+        name: isEcoVadisCertified ? (c as any).Entreprise || "Unknown" : (c as any).Company || "Unknown",
         lastVerified: c["Last verified"],
         parsedDate: parseDate(c["Last verified"])
       })));
