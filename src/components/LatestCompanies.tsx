@@ -1,25 +1,7 @@
 
 import { CompanyCard } from "@/components/CompanyCard";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-
-interface Company {
-  name: string;
-  website: string;
-  certificationLevel: string | null;
-  employeeCount: string;
-  industry: string;
-  country: string;
-  isNew?: boolean;
-  logo?: string;
-  description?: string;
-  publicationDate?: string;
-  sourceLink?: string;
-  lastVerified?: string;
-  keywords?: string;
-  linkedin?: string;
-  annualRevenue?: string;
-}
+import { Company } from "@/hooks/use-companies";
 
 interface LatestCompaniesProps {
   companies: Company[];
@@ -63,7 +45,7 @@ export const LatestCompanies = ({
               keywords={company.keywords}
               linkedin={company.linkedin}
               annualRevenue={company.annualRevenue}
-              isEcoVadisCertified={true}
+              isEcoVadisCertified={company.isEcoVadisCertified || true}
             />
           ))
         )}
