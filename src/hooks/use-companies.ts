@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -81,20 +80,33 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
     queryFn: async () => {
       console.log(`Fetching latest ${isEcoVadisCertified ? 'certified' : 'non-certified'} companies...`);
       
-      // Utilise "Date de création" pour trier par date d'ajout à la base de données
+      // Make sure to properly convert date strings for sorting
       const { data, error } = await supabase
         .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
-        .select("*")
-        .order('Date de création', { ascending: false }) // Sort by creation date descending
-        .limit(3);
+        .select("*");
 
       if (error) {
         console.error("Error fetching latest companies:", error);
         throw error;
       }
 
-      console.log("Latest companies data:", data);
-      return data ? data.map(isEcoVadisCertified ? transformCertifiedCompanyData : transformNonCertifiedCompanyData) : [];
+      console.log("Raw companies data:", data);
+      
+      // Process the data on the client side to ensure proper date sorting
+      let companies = data || [];
+      
+      // Custom sort function to handle date strings properly
+      companies.sort((a, b) => {
+        const dateA = a["Date de création"] ? new Date(a["Date de création"].replace(/pm|am/i, '').trim()) : new Date(0);
+        const dateB = b["Date de création"] ? new Date(b["Date de création"].replace(/pm|am/i, '').trim()) : new Date(0);
+        return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+      });
+
+      // Get the top 3 companies after sorting
+      const latestCompanies = companies.slice(0, 3);
+      console.log("Latest 3 companies after sorting:", latestCompanies);
+      
+      return latestCompanies.map(isEcoVadisCertified ? transformCertifiedCompanyData : transformNonCertifiedCompanyData);
     },
   });
 };
