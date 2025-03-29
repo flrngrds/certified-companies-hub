@@ -23,8 +23,8 @@ export const parseDate = (dateString: string): Date | null => {
   }
   
   // Fallback for other formats
-  console.warn(`Date format not recognized for: ${dateString}, returning current date`);
-  return new Date();
+  console.warn(`Date format not recognized for: ${dateString}, returning null`);
+  return null;
 };
 
 /**

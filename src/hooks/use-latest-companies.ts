@@ -27,9 +27,16 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       
       // Custom sort function to handle date strings properly for Last verified field
       companies.sort((a, b) => {
-        const dateA = parseDate(a["Last verified"]) || new Date(0);
-        const dateB = parseDate(b["Last verified"]) || new Date(0);
-        return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+        const dateA = parseDate(a["Last verified"]);
+        const dateB = parseDate(b["Last verified"]);
+        
+        // Handle null dates (put them at the end)
+        if (!dateA && !dateB) return 0;
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        
+        // Sort in descending order (newest first)
+        return dateB.getTime() - dateA.getTime();
       });
 
       // Get the top 3 companies after sorting
