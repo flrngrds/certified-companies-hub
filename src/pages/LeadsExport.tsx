@@ -9,7 +9,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Download } from "lucide-react";
+import { Download, ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 
@@ -151,7 +151,7 @@ const LeadsExport = () => {
         {/* SEO Meta Tag */}
         <meta name="robots" content="noindex" />
         
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-8">
           <div className="bg-white p-8 rounded-lg shadow-sm space-y-6">
             <h1 className="text-2xl font-semibold text-gray-900">Export Company Leads</h1>
             
@@ -166,7 +166,7 @@ const LeadsExport = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Choose a country" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {countries.map((country) => (
                     <SelectItem key={country} value={country}>
                       {country}
@@ -194,6 +194,48 @@ const LeadsExport = () => {
             <p className="text-sm text-gray-500 mt-4">
               This will export the 15 most recently added companies from the selected country.
             </p>
+          </div>
+          
+          {/* Call-to-action section */}
+          <div className="bg-gradient-to-r from-primary to-primary-hover p-8 rounded-lg shadow-sm text-white">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Unlock Premium Leads Access</h2>
+              <p className="text-white/90">
+                With a VadiBase subscription, you can access unlimited leads, detailed company information, and advanced filtering options.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+                <div className="flex items-start">
+                  <div className="bg-white/20 p-1 rounded mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span className="text-sm">Unlimited exports</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="bg-white/20 p-1 rounded mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span className="text-sm">Advanced filters</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="bg-white/20 p-1 rounded mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span className="text-sm">Full contact details</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="bg-white/20 p-1 rounded mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span className="text-sm">Weekly new leads alerts</span>
+                </div>
+              </div>
+              <Link to="/signup">
+                <Button className="w-full mt-2 bg-white text-primary hover:bg-gray-100">
+                  Start Your Free Trial
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
