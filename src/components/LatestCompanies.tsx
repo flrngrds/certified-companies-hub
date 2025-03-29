@@ -1,7 +1,7 @@
 
 import { CompanyCard } from "@/components/CompanyCard";
 import { Badge } from "@/components/ui/badge";
-import { Company } from "@/hooks/use-companies";
+import { Company } from "@/types/company";
 
 interface LatestCompaniesProps {
   companies: Company[];
@@ -52,4 +52,4 @@ export const LatestCompanies = ({
       </div>
     </div>
   );
-};
+}
