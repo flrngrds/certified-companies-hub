@@ -1,38 +1,27 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
-
 const LeadsExport = () => {
   const [countries, setCountries] = useState<string[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     fetchCountries();
   }, []);
-
   const fetchCountries = async () => {
     try {
-      const { data, error } = await supabase
-        .from("EcoVadis-certified")
-        .select("Country")
-        .not("Country", "eq", null)
-        .order("Country");
-
+      const {
+        data,
+        error
+      } = await supabase.from("EcoVadis-certified").select("Country").not("Country", "eq", null).order("Country");
       if (error) throw error;
-
       const uniqueCountries = Array.from(new Set(data.map(item => item.Country)));
       setCountries(uniqueCountries);
     } catch (error) {
@@ -40,37 +29,34 @@ const LeadsExport = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch countries. Please try again.",
+        description: "Failed to fetch countries. Please try again."
       });
     }
   };
-
   const handleExport = async () => {
     if (!selectedCountry) {
       toast({
         variant: "destructive",
         title: "Country Required",
-        description: "Please select a country before downloading leads.",
+        description: "Please select a country before downloading leads."
       });
       return;
     }
-
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("EcoVadis-certified")
-        .select("*")
-        .eq("Country", selectedCountry)
-        .order("id", { ascending: false })
-        .limit(15); // Changed from 20 to 15
+      const {
+        data,
+        error
+      } = await supabase.from("EcoVadis-certified").select("*").eq("Country", selectedCountry).order("id", {
+        ascending: false
+      }).limit(15); // Changed from 20 to 15
 
       if (error) throw error;
-
       if (!data || data.length === 0) {
         toast({
           variant: "destructive",
           title: "No Data",
-          description: "No companies found for the selected country.",
+          description: "No companies found for the selected country."
         });
         return;
       }
@@ -79,29 +65,25 @@ const LeadsExport = () => {
       const csvData = data.map(company => ({
         Company: company.Entreprise || "",
         Website: company.Website || "",
-        Link: company.Lien || "", // Added Link column
+        Link: company.Lien || "",
+        // Added Link column
         CertificationLevel: company.Niveau || "",
         Industry: company.Industry || "",
         Country: company.Country || "",
         Employees: company.Employees || "",
         "Annual Revenue": company["Annual Revenue"] || "",
         "Last Verified": company["Last verified"] || "",
-        "LinkedIn": company.LinkedIn || "",
+        "LinkedIn": company.LinkedIn || ""
       }));
 
       // Convert to CSV
       const headers = Object.keys(csvData[0]);
-      const csvString = [
-        headers.join(","),
-        ...csvData.map(row => 
-          headers.map(header => 
-            JSON.stringify(row[header as keyof typeof row] || "")
-          ).join(",")
-        )
-      ].join("\n");
+      const csvString = [headers.join(","), ...csvData.map(row => headers.map(header => JSON.stringify(row[header as keyof typeof row] || "")).join(","))].join("\n");
 
       // Create and download file
-      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csvString], {
+        type: "text/csv;charset=utf-8;"
+      });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
@@ -109,25 +91,22 @@ const LeadsExport = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       toast({
         title: "Success",
-        description: "Leads exported successfully!",
+        description: "Leads exported successfully!"
       });
     } catch (error) {
       console.error("Error exporting leads:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to export leads. Please try again.",
+        description: "Failed to export leads. Please try again."
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4">
@@ -159,36 +138,23 @@ const LeadsExport = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Select Country
               </label>
-              <Select
-                value={selectedCountry}
-                onValueChange={setSelectedCountry}
-              >
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Choose a country" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
+                  {countries.map(country => <SelectItem key={country} value={country}>
                       {country}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            <Button
-              onClick={handleExport}
-              disabled={isLoading || !selectedCountry}
-              className="w-full"
-            >
-              {isLoading ? (
-                "Generating Export..."
-              ) : (
-                <>
+            <Button onClick={handleExport} disabled={isLoading || !selectedCountry} className="w-full">
+              {isLoading ? "Generating Export..." : <>
                   <Download className="mr-2 h-4 w-4" />
                   Download Leads
-                </>
-              )}
+                </>}
             </Button>
 
             <p className="text-sm text-gray-500 mt-4">
@@ -208,7 +174,7 @@ const LeadsExport = () => {
                   <div className="bg-white/20 p-1 rounded mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                   </div>
-                  <span className="text-sm">Unlimited exports</span>
+                  <span className="text-sm">Unlimited companies</span>
                 </div>
                 <div className="flex items-start">
                   <div className="bg-white/20 p-1 rounded mr-2">
@@ -239,8 +205,6 @@ const LeadsExport = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LeadsExport;
