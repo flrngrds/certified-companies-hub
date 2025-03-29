@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,14 +19,14 @@ export interface Company {
   linkedin?: string;
   annualRevenue?: string;
   isEcoVadisCertified?: boolean;
-  addedAt?: string; // Pour capturer la date de création pour trier
+  addedAt?: string;
 }
 
 const transformCertifiedCompanyData = (data: any): Company => {
-  // Parse the creation date string into a Date object
-  const creationDate = data["Date de création"] ? new Date(data["Date de création"].replace(/pm|am/i, '').trim()) : null;
-  const isNew = creationDate ? 
-    (new Date().getTime() - creationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies added in last 30 days as new
+  // Parse the verification date string into a Date object
+  const verificationDate = data["Last verified"] ? new Date(data["Last verified"].replace(/pm|am/i, '').trim()) : null;
+  const isNew = verificationDate ? 
+    (new Date().getTime() - verificationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies verified in last 30 days as new
     false;
 
   return {
@@ -50,10 +51,10 @@ const transformCertifiedCompanyData = (data: any): Company => {
 };
 
 const transformNonCertifiedCompanyData = (data: any): Company => {
-  // Parse the creation date string into a Date object
-  const creationDate = data["Date de création"] ? new Date(data["Date de création"].replace(/pm|am/i, '').trim()) : null;
-  const isNew = creationDate ? 
-    (new Date().getTime() - creationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies added in last 30 days as new
+  // Parse the verification date string into a Date object
+  const verificationDate = data["Last verified"] ? new Date(data["Last verified"].replace(/pm|am/i, '').trim()) : null;
+  const isNew = verificationDate ? 
+    (new Date().getTime() - verificationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies verified in last 30 days as new
     false;
 
   return {
@@ -95,16 +96,16 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       // Process the data on the client side to ensure proper date sorting
       let companies = data || [];
       
-      // Custom sort function to handle date strings properly
+      // Custom sort function to handle date strings properly for Last verified field
       companies.sort((a, b) => {
-        const dateA = a["Date de création"] ? new Date(a["Date de création"].replace(/pm|am/i, '').trim()) : new Date(0);
-        const dateB = b["Date de création"] ? new Date(b["Date de création"].replace(/pm|am/i, '').trim()) : new Date(0);
+        const dateA = a["Last verified"] ? new Date(a["Last verified"].replace(/pm|am/i, '').trim()) : new Date(0);
+        const dateB = b["Last verified"] ? new Date(b["Last verified"].replace(/pm|am/i, '').trim()) : new Date(0);
         return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
       });
 
       // Get the top 3 companies after sorting
       const latestCompanies = companies.slice(0, 3);
-      console.log("Latest 3 companies after sorting:", latestCompanies);
+      console.log("Latest 3 companies after sorting by Last verified:", latestCompanies);
       
       return latestCompanies.map(isEcoVadisCertified ? transformCertifiedCompanyData : transformNonCertifiedCompanyData);
     },
