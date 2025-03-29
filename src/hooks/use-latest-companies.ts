@@ -25,9 +25,13 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       // Process the data on the client side to ensure proper date sorting
       let companies = data || [];
       
-      // For debugging
+      // For debugging - using type-safe property access
       companies.forEach(company => {
-        console.log(`Company: ${isEcoVadisCertified ? company.Entreprise : company.Company}, Last verified: ${company["Last verified"]}, Parsed date:`, parseDate(company["Last verified"]));
+        const companyName = isEcoVadisCertified 
+          ? (company as any).Entreprise 
+          : (company as any).Company;
+        
+        console.log(`Company: ${companyName}, Last verified: ${company["Last verified"]}, Parsed date:`, parseDate(company["Last verified"]));
       });
       
       // Custom sort function to handle date strings properly for Last verified field
