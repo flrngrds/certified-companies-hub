@@ -24,7 +24,7 @@ export interface Company {
 
 const transformCertifiedCompanyData = (data: any): Company => {
   // Parse the verification date string into a Date object
-  const verificationDate = data["Last verified"] ? new Date(data["Last verified"].replace(/pm|am/i, '').trim()) : null;
+  const verificationDate = data["Last verified"] ? parseDate(data["Last verified"]) : null;
   const isNew = verificationDate ? 
     (new Date().getTime() - verificationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies verified in last 30 days as new
     false;
@@ -52,7 +52,7 @@ const transformCertifiedCompanyData = (data: any): Company => {
 
 const transformNonCertifiedCompanyData = (data: any): Company => {
   // Parse the verification date string into a Date object
-  const verificationDate = data["Last verified"] ? new Date(data["Last verified"].replace(/pm|am/i, '').trim()) : null;
+  const verificationDate = data["Last verified"] ? parseDate(data["Last verified"]) : null;
   const isNew = verificationDate ? 
     (new Date().getTime() - verificationDate.getTime()) < (30 * 24 * 60 * 60 * 1000) : // Consider companies verified in last 30 days as new
     false;
@@ -75,13 +75,38 @@ const transformNonCertifiedCompanyData = (data: any): Company => {
   };
 };
 
+// Helper function to parse dates in DD/MM/YYYY format
+const parseDate = (dateString: string): Date | null => {
+  if (!dateString) return null;
+  
+  // Handle the DD/MM/YYYY format
+  const dateParts = dateString.split('/');
+  if (dateParts.length === 3) {
+    // In DD/MM/YYYY format, parts are [day, month, year]
+    const day = parseInt(dateParts[0], 10);
+    const month = parseInt(dateParts[1], 10) - 1; // JavaScript months are 0-indexed
+    const year = parseInt(dateParts[2], 10);
+    
+    // Create date (handles validation automatically)
+    const date = new Date(year, month, day);
+    
+    // Check if the date is valid
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+  }
+  
+  // Fallback for other formats
+  console.warn(`Date format not recognized for: ${dateString}, returning current date`);
+  return new Date();
+};
+
 export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
   return useQuery({
     queryKey: ["latestCompanies", isEcoVadisCertified],
     queryFn: async () => {
       console.log(`Fetching latest ${isEcoVadisCertified ? 'certified' : 'non-certified'} companies...`);
       
-      // Make sure to properly convert date strings for sorting
       const { data, error } = await supabase
         .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*");
@@ -98,8 +123,8 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       
       // Custom sort function to handle date strings properly for Last verified field
       companies.sort((a, b) => {
-        const dateA = a["Last verified"] ? new Date(a["Last verified"].replace(/pm|am/i, '').trim()) : new Date(0);
-        const dateB = b["Last verified"] ? new Date(b["Last verified"].replace(/pm|am/i, '').trim()) : new Date(0);
+        const dateA = parseDate(a["Last verified"]) || new Date(0);
+        const dateB = parseDate(b["Last verified"]) || new Date(0);
         return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
       });
 
