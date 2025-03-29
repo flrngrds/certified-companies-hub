@@ -19,6 +19,7 @@ export interface Company {
   linkedin?: string;
   annualRevenue?: string;
   isEcoVadisCertified?: boolean;
+  addedAt?: string; // Pour capturer la date de création pour trier
 }
 
 const transformCertifiedCompanyData = (data: any): Company => {
@@ -44,7 +45,8 @@ const transformCertifiedCompanyData = (data: any): Company => {
     keywords: data.Keywords || 'No keywords available',
     linkedin: data.LinkedIn || '#',
     annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
-    isEcoVadisCertified: true
+    isEcoVadisCertified: true,
+    addedAt: data["Date de création"] || null
   };
 };
 
@@ -68,7 +70,8 @@ const transformNonCertifiedCompanyData = (data: any): Company => {
     lastVerified: data["Last verified"] || 'Not Specified',
     keywords: data.Keywords || 'No keywords available',
     annualRevenue: data["Annual Revenue"]?.toString() || 'Not Specified',
-    isEcoVadisCertified: false
+    isEcoVadisCertified: false,
+    addedAt: data["Date de création"] || null
   };
 };
 
@@ -77,10 +80,12 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
     queryKey: ["latestCompanies", isEcoVadisCertified],
     queryFn: async () => {
       console.log(`Fetching latest ${isEcoVadisCertified ? 'certified' : 'non-certified'} companies...`);
+      
+      // Utilise "Date de création" pour trier par date d'ajout à la base de données
       const { data, error } = await supabase
         .from(isEcoVadisCertified ? "EcoVadis-certified" : "Non-EcoVadis-certified")
         .select("*")
-        .order('id', { ascending: false }) // Order by id descending to get the most recently added companies
+        .order('Date de création', { ascending: false }) // Sort by creation date descending
         .limit(3);
 
       if (error) {
