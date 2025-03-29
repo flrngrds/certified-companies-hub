@@ -36,3 +36,40 @@ export const isCompanyNew = (verificationDate: Date | null): boolean => {
   // Consider companies verified in last 30 days as new
   return (new Date().getTime() - verificationDate.getTime()) < (30 * 24 * 60 * 60 * 1000);
 };
+
+/**
+ * Format a date to a user-friendly string representation
+ * 
+ * @param date - The date to format (can be Date object or string in DD/MM/YYYY format)
+ * @param format - The output format ('full', 'medium', 'short')
+ * @returns A formatted date string
+ */
+export const formatDate = (date: Date | string | null, format: 'full' | 'medium' | 'short' = 'medium'): string => {
+  if (!date) return 'N/A';
+  
+  // If date is a string, try to parse it
+  if (typeof date === 'string') {
+    const parsedDate = parseDate(date);
+    if (!parsedDate) return 'Invalid date';
+    date = parsedDate;
+  }
+  
+  // Format options based on requested format style
+  try {
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: format === 'short' ? 'numeric' : 'long',
+      day: 'numeric',
+    };
+    
+    // Add additional details for fuller formats
+    if (format === 'full') {
+      options.weekday = 'long';
+    }
+    
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Error formatting date';
+  }
+};
