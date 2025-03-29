@@ -28,8 +28,8 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       // For debugging - log each company with its verification date
       companies.forEach(company => {
         const companyName = isEcoVadisCertified 
-          ? (company as any).Entreprise 
-          : (company as any).Company;
+          ? company.Entreprise || "Unknown"
+          : company.Company || "Unknown";
         
         const verifiedDate = company["Last verified"];
         const parsedDate = parseDate(verifiedDate);
@@ -41,16 +41,16 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
       // Custom sort function to handle date strings properly for Last verified field
       companies.sort((a, b) => {
         // Get the original date strings
-        const dateStrA = a["Last verified"];
-        const dateStrB = b["Last verified"];
+        const dateStrA = a["Last verified"] || "";
+        const dateStrB = b["Last verified"] || "";
         
         // Parse them using our improved parseDate function
         const dateA = parseDate(dateStrA);
         const dateB = parseDate(dateStrB);
         
-        console.log(`Comparing dates: 
-          A: ${(a as any).Entreprise || (a as any).Company} - ${dateStrA} → ${dateA ? dateA.toISOString() : 'null'}
-          B: ${(b as any).Entreprise || (b as any).Company} - ${dateStrB} → ${dateB ? dateB.toISOString() : 'null'}`);
+        console.log(`Comparing dates for sorting: 
+          A: ${(a as any).Entreprise || (a as any).Company || "Unknown"} - ${dateStrA} → ${dateA ? dateA.toISOString() : 'null'}
+          B: ${(b as any).Entreprise || (b as any).Company || "Unknown"} - ${dateStrB} → ${dateB ? dateB.toISOString() : 'null'}`);
         
         // Handle null dates (put them at the end)
         if (!dateA && !dateB) return 0;
@@ -61,10 +61,17 @@ export const useLatestCompanies = (isEcoVadisCertified: boolean = true) => {
         return dateB.getTime() - dateA.getTime();
       });
 
+      // Additional debugging - log companies after sorting
+      console.log("Companies after sorting by Last verified:", companies.map(c => ({
+        name: isEcoVadisCertified ? c.Entreprise || "Unknown" : c.Company || "Unknown",
+        lastVerified: c["Last verified"],
+        parsedDate: parseDate(c["Last verified"])
+      })));
+
       // Get the top 3 companies after sorting
       const latestCompanies = companies.slice(0, 3);
       console.log("Latest 3 companies after sorting by Last verified:", latestCompanies.map(c => ({
-        name: isEcoVadisCertified ? (c as any).Entreprise : (c as any).Company,
+        name: isEcoVadisCertified ? c.Entreprise || "Unknown" : c.Company || "Unknown",
         lastVerified: c["Last verified"],
         parsedDate: parseDate(c["Last verified"])
       })));

@@ -24,6 +24,27 @@ export const parseDate = (dateString: string): Date | null => {
       return date;
     }
   }
+
+  // Try to parse date in MM/DD/YYYY format (additional format)
+  const mmddyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  const mmddyyyyMatch = dateString.match(mmddyyyyRegex);
+  
+  if (mmddyyyyMatch) {
+    // Try alternative interpretation (might be MM/DD/YYYY)
+    const month = parseInt(mmddyyyyMatch[1], 10) - 1;
+    const day = parseInt(mmddyyyyMatch[2], 10);
+    const year = parseInt(mmddyyyyMatch[3], 10);
+    
+    // This interpretation is only valid if month is 1-12 and day is valid for that month
+    if (month >= 0 && month < 12 && day >= 1 && day <= 31) {
+      const date = new Date(year, month, day);
+      console.log(`Trying alternative MM/DD/YYYY format: ${dateString} → ${date.toISOString()}`);
+      
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+  }
   
   // Try to extract date from text format like "Saturday, March 29, 2025"
   try {
