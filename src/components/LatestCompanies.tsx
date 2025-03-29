@@ -36,7 +36,7 @@ export const LatestCompanies = ({
               employeeCount={company.employeeCount}
               industry={company.industry}
               country={company.country}
-              isNew={true}
+              isNew={company.isNew}
               logo={company.logo}
               description={company.description}
               publicationDate={company.publicationDate}
@@ -45,7 +45,7 @@ export const LatestCompanies = ({
               keywords={company.keywords}
               linkedin={company.linkedin}
               annualRevenue={company.annualRevenue}
-              isEcoVadisCertified={company.isEcoVadisCertified || true}
+              isEcoVadisCertified={company.isEcoVadisCertified}
             />
           ))
         )}

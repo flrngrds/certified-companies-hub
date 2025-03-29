@@ -73,3 +73,4 @@ export const formatDate = (date: Date | string | null, format: 'full' | 'medium'
     return 'Error formatting date';
   }
 };
+
