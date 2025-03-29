@@ -46,7 +46,7 @@ export type Database = {
           Country: string | null
           "Date de création": string | null
           "Date de modification": string | null
-          Employees: number | null
+          Employees: string | null
           Entreprise: string
           Founded: number | null
           id: number
@@ -73,7 +73,7 @@ export type Database = {
           Country?: string | null
           "Date de création"?: string | null
           "Date de modification"?: string | null
-          Employees?: number | null
+          Employees?: string | null
           Entreprise: string
           Founded?: number | null
           id?: number
@@ -100,7 +100,7 @@ export type Database = {
           Country?: string | null
           "Date de création"?: string | null
           "Date de modification"?: string | null
-          Employees?: number | null
+          Employees?: string | null
           Entreprise?: string
           Founded?: number | null
           id?: number

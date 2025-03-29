@@ -1,11 +1,12 @@
+
 import { CompanyCard } from "@/components/CompanyCard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SubscriptionManager } from "./profile/SubscriptionManager";
+import { checkSubscription, handlePremiumFeature } from "@/utils/subscription-utils";
+
 interface Company {
   name: string;
   website: string;
@@ -32,42 +33,23 @@ export const CompaniesList = ({
   totalCompanies
 }: CompaniesListProps) => {
   const [showPricing, setShowPricing] = useState(false);
-  const {
-    toast
-  } = useToast();
   const [currentPlan, setCurrentPlan] = useState<string>("free");
-  const checkSubscription = async () => {
-    try {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
-      if (!session) return "free";
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('check-subscription');
-      if (error) throw error;
-      return data.plan;
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      return "free";
-    }
-  };
+  
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      const plan = await checkSubscription();
+      setCurrentPlan(plan);
+    };
+    
+    fetchSubscription();
+  }, []);
+
   const handlePageChange = async (newPage: number) => {
-    const plan = await checkSubscription();
-    setCurrentPlan(plan);
-    if (plan === "free") {
-      toast({
-        title: "Premium Feature",
-        description: "Please upgrade to a paid plan to navigate through pages."
-      });
-      setShowPricing(true);
-      return;
+    if (handlePremiumFeature(currentPlan, setShowPricing, "pagination")) {
+      onPageChange(newPage);
     }
-    onPageChange(newPage);
   };
+
   return <section className="bg-white rounded-lg p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-medium text-gray-900">All Companies</h3>
