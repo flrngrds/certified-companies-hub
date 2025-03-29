@@ -1,20 +1,23 @@
 
 /**
- * Helper function to parse dates in DD/MM/YYYY format
+ * Helper function to parse dates in various formats (DD/MM/YYYY or stored text representations)
  */
 export const parseDate = (dateString: string): Date | null => {
   if (!dateString) return null;
   
+  console.log(`Attempting to parse date: "${dateString}"`);
+  
   // Handle the DD/MM/YYYY format
-  const dateParts = dateString.split('/');
-  if (dateParts.length === 3) {
-    // In DD/MM/YYYY format, parts are [day, month, year]
-    const day = parseInt(dateParts[0], 10);
-    const month = parseInt(dateParts[1], 10) - 1; // JavaScript months are 0-indexed
-    const year = parseInt(dateParts[2], 10);
+  const ddmmyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  const ddmmyyyyMatch = dateString.match(ddmmyyyyRegex);
+  
+  if (ddmmyyyyMatch) {
+    const day = parseInt(ddmmyyyyMatch[1], 10);
+    const month = parseInt(ddmmyyyyMatch[2], 10) - 1; // JavaScript months are 0-indexed
+    const year = parseInt(ddmmyyyyMatch[3], 10);
     
-    // Create date (handles validation automatically)
     const date = new Date(year, month, day);
+    console.log(`Parsed DD/MM/YYYY date: ${dateString} → ${date.toISOString()}`);
     
     // Check if the date is valid
     if (!isNaN(date.getTime())) {
@@ -22,7 +25,18 @@ export const parseDate = (dateString: string): Date | null => {
     }
   }
   
-  // Fallback for other formats
+  // Try to extract date from text format like "Saturday, March 29, 2025"
+  try {
+    // This will handle various date formats including text representations
+    const parsedDate = new Date(dateString);
+    if (!isNaN(parsedDate.getTime())) {
+      console.log(`Parsed text date: ${dateString} → ${parsedDate.toISOString()}`);
+      return parsedDate;
+    }
+  } catch (e) {
+    console.warn(`Failed to parse date from text: ${dateString}`);
+  }
+  
   console.warn(`Date format not recognized for: ${dateString}, returning null`);
   return null;
 };
@@ -73,4 +87,3 @@ export const formatDate = (date: Date | string | null, format: 'full' | 'medium'
     return 'Error formatting date';
   }
 };
-
