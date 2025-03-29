@@ -1,7 +1,7 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Link2, Clock, Globe, Linkedin } from "lucide-react";
-import { formatDate } from "@/utils/date-utils";
 
 interface CompanyDetailsProps {
   name: string;
@@ -73,7 +73,7 @@ export const CompanyDetails = ({
             <>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
-                <span>Published: {publicationDate ? formatDate(publicationDate) : 'N/A'}</span>
+                <span>Published: {publicationDate}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Link2 className="h-4 w-4 text-gray-500" />
@@ -85,7 +85,7 @@ export const CompanyDetails = ({
           )}
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-500" />
-            <span>Last Verified: {lastVerified ? formatDate(lastVerified, 'full') : 'N/A'}</span>
+            <span>Last Verified: {lastVerified}</span>
           </div>
         </div>
       </div>
