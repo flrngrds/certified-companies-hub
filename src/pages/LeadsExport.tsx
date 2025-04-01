@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Download, ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+
 const LeadsExport = () => {
   const [countries, setCountries] = useState<string[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
@@ -12,9 +13,11 @@ const LeadsExport = () => {
   const {
     toast
   } = useToast();
+
   useEffect(() => {
     fetchCountries();
   }, []);
+
   const fetchCountries = async () => {
     try {
       const {
@@ -33,6 +36,7 @@ const LeadsExport = () => {
       });
     }
   };
+
   const handleExport = async () => {
     if (!selectedCountry) {
       toast({
@@ -49,7 +53,7 @@ const LeadsExport = () => {
         error
       } = await supabase.from("EcoVadis-certified").select("*").eq("Country", selectedCountry).order("id", {
         ascending: false
-      }).limit(15); // Changed from 20 to 15
+      }).limit(15);
 
       if (error) throw error;
       if (!data || data.length === 0) {
@@ -61,12 +65,10 @@ const LeadsExport = () => {
         return;
       }
 
-      // Format data for CSV
       const csvData = data.map(company => ({
         Company: company.Entreprise || "",
         Website: company.Website || "",
         Link: company.Lien || "",
-        // Added Link column
         CertificationLevel: company.Niveau || "",
         Industry: company.Industry || "",
         Country: company.Country || "",
@@ -76,11 +78,9 @@ const LeadsExport = () => {
         "LinkedIn": company.LinkedIn || ""
       }));
 
-      // Convert to CSV
       const headers = Object.keys(csvData[0]);
       const csvString = [headers.join(","), ...csvData.map(row => headers.map(header => JSON.stringify(row[header as keyof typeof row] || "")).join(","))].join("\n");
 
-      // Create and download file
       const blob = new Blob([csvString], {
         type: "text/csv;charset=utf-8;"
       });
@@ -106,8 +106,8 @@ const LeadsExport = () => {
       setIsLoading(false);
     }
   };
+
   return <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
@@ -127,7 +127,6 @@ const LeadsExport = () => {
       </nav>
 
       <div className="container mx-auto px-4 py-8">
-        {/* SEO Meta Tag */}
         <meta name="robots" content="noindex" />
         
         <div className="max-w-3xl mx-auto space-y-8">
@@ -162,7 +161,6 @@ const LeadsExport = () => {
             </p>
           </div>
           
-          {/* Call-to-action section */}
           <div className="bg-gradient-to-r from-primary to-primary-hover p-8 rounded-lg shadow-sm text-white">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Unlock Premium Leads Access</h2>
@@ -197,7 +195,7 @@ const LeadsExport = () => {
               </div>
               <Link to="/signup">
                 <Button className="w-full mt-2 bg-white text-primary hover:bg-gray-100">
-                  Start Your Free Trial
+                  Find new clients now
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -207,4 +205,5 @@ const LeadsExport = () => {
       </div>
     </div>;
 };
+
 export default LeadsExport;
